@@ -54,12 +54,12 @@ var (
 
 		//Control
 		NOP:      {Opcode: NOP, Name: "NOP", Exec: opNop},
-		JMP:      {Opcode: JMP, Name: "JMP", Exec: opJmp},
+		JMP:      {Opcode: JMP, Name: "JMP", Exec: opJmp}, // only three kind of JMP
 		JMPIF:    {Opcode: JMPIF, Name: "JMPIF", Exec: opJmp},
 		JMPIFNOT: {Opcode: JMPIFNOT, Name: "JMPIFNOT", Exec: opJmp},
 		CALL:     {Opcode: CALL, Name: "CALL", Exec: opCall, Validator: validateCall},
 		RET:      {Opcode: RET, Name: "RET", Exec: opRet},
-		APPCALL:  {Opcode: APPCALL, Name: "APPCALL"},
+		APPCALL:  {Opcode: APPCALL, Name: "APPCALL"}, // APPCALL AND SYSCALL will exec as NATIVE service. the service is not define by user. but the system stack bottom
 		//TAILCALL: {Opcode: TAILCALL, Name: "TAILCALL", Exec: opAppCall},
 		SYSCALL: {Opcode: SYSCALL, Name: "SYSCALL"},
 		DCALL:   {Opcode: DCALL, Name: "DCALL", Exec: opDCALL, Validator: validateDCALL},
@@ -83,14 +83,14 @@ var (
 		TUCK:            {Opcode: TUCK, Name: "TUCK", Exec: opTuck, Validator: validateCount2},
 
 		//Splice
-		CAT:    {Opcode: CAT, Name: "CAT", Exec: opCat, Validator: validateCat},
-		SUBSTR: {Opcode: SUBSTR, Name: "SUBSTR", Exec: opSubStr, Validator: validateSubStr},
-		LEFT:   {Opcode: LEFT, Name: "LEFT", Exec: opLeft, Validator: validateLeft},
-		RIGHT:  {Opcode: RIGHT, Name: "RIGHT", Exec: opRight, Validator: validateRight},
-		SIZE:   {Opcode: SIZE, Name: "SIZE", Exec: opSize, Validator: validateCount1},
+		CAT:    {Opcode: CAT, Name: "CAT", Exec: opCat, Validator: validateCat},             // stack structure bottom { bytearray0, bytearray1 } ===> {ByteArray0+ByteArray1}
+		SUBSTR: {Opcode: SUBSTR, Name: "SUBSTR", Exec: opSubStr, Validator: validateSubStr}, // like array slice. bottom{ByteArray, index, count} top ===> bottom {ByteArray[index : index+count]}
+		LEFT:   {Opcode: LEFT, Name: "LEFT", Exec: opLeft, Validator: validateLeft},         // bottom {ByteArray, count} top ==> bottom { ByteArray[0:count]}
+		RIGHT:  {Opcode: RIGHT, Name: "RIGHT", Exec: opRight, Validator: validateRight},     // bottom {ByteArray, count} top ==> bottom { ByteArray[len(B)-count :]}
+		SIZE:   {Opcode: SIZE, Name: "SIZE", Exec: opSize, Validator: validateCount1},       //calulate the ByteArray size to stackItem
 
 		//Bitwiase logic
-		INVERT: {Opcode: INVERT, Name: "INVERT", Exec: opInvert, Validator: validateCount1},
+		INVERT: {Opcode: INVERT, Name: "INVERT", Exec: opInvert, Validator: validateCount1}, // NOT logic
 		AND:    {Opcode: AND, Name: "AND", Exec: opBigIntZip, Validator: validateCount2},
 		OR:     {Opcode: OR, Name: "OR", Exec: opBigIntZip, Validator: validateCount2},
 		XOR:    {Opcode: XOR, Name: "XOR", Exec: opBigIntZip, Validator: validateCount2},

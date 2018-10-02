@@ -41,10 +41,10 @@ const (
 	ONG_NAME         = "ONG Token"
 	ONG_SYMBOL       = "ONG"
 	ONG_DECIMALS     = 9
-	ONG_TOTAL_SUPPLY = uint64(1000000000000000000)
+	ONG_TOTAL_SUPPLY = uint64(1000000000000000000) //10 billion * 10^9
 )
 
-// ont/ong unbound model constants
+// ont/ong unbound model constants, count with seconds, 31536000 = 60*60*24*365
 const UNBOUND_TIME_INTERVAL = uint32(31536000)
 
 var UNBOUND_GENERATION_AMOUNT = [18]uint64{5, 4, 3, 3, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
@@ -64,7 +64,7 @@ var UNBOUND_DEADLINE = (func() uint32 {
 		panic("incompatible constants setting")
 	}
 
-	return UNBOUND_TIME_INTERVAL*uint32(numInterval) - uint32(count-uint64(ONT_TOTAL_SUPPLY))
+	return UNBOUND_TIME_INTERVAL*uint32(numInterval) - uint32(count-uint64(ONT_TOTAL_SUPPLY)) //ong only 10^9
 })()
 
 // multi-sig constants

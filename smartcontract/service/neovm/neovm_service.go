@@ -32,8 +32,10 @@ import (
 	"github.com/ontio/ontology/smartcontract/context"
 	"github.com/ontio/ontology/smartcontract/event"
 	"github.com/ontio/ontology/smartcontract/storage"
+	"github.com/ontio/ontology/smartcontract/test/makemap"
 	vm "github.com/ontio/ontology/vm/neovm"
 	ntypes "github.com/ontio/ontology/vm/neovm/types"
+	//"runtime/debug"
 )
 
 var (
@@ -172,6 +174,17 @@ func (this *NeoVmService) Invoke() (interface{}, error) {
 				return nil, ERR_GAS_INSUFFICIENT
 			}
 		}
+		//fmt.Printf("0x%02x\n", this.Engine.OpCode)
+		//makemap.Makemap()
+
+		fmt.Printf("offset: %d\t OpCode:%d\t OpName:", this.Engine.Context.GetInstructionPointer()-1, this.Engine.OpCode)
+		if this.Engine.OpCode >= vm.PUSHBYTES1 && this.Engine.OpCode <= vm.PUSHBYTES75 {
+			fmt.Printf("%s%d\n", "PUSHBYTES", this.Engine.OpCode)
+		} else {
+			fmt.Printf("%s\n", makemap.Codemap[this.Engine.OpCode])
+		}
+		//debug.PrintStack()
+
 		switch this.Engine.OpCode {
 		case vm.VERIFY:
 			if vm.EvaluationStackCount(this.Engine) < 3 {
@@ -199,6 +212,7 @@ func (this *NeoVmService) Invoke() (interface{}, error) {
 				vm.PushData(this.Engine, true)
 			}
 		case vm.SYSCALL:
+			//fmt.Printf("get system call\n")
 			if err := this.SystemCall(this.Engine); err != nil {
 				return nil, errors.NewDetailErr(err, errors.ErrNoCode, "[NeoVmService] service system call error!")
 			}
@@ -262,6 +276,7 @@ func (this *NeoVmService) SystemCall(engine *vm.ExecutionEngine) error {
 	if err != nil {
 		return err
 	}
+	fmt.Printf("syscall service Name:%s\n", serviceName)
 	service, ok := ServiceMap[serviceName]
 	if !ok {
 		return errors.NewErr(fmt.Sprintf("[SystemCall] service not support: %s", serviceName))

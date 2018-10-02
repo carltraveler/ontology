@@ -26,7 +26,7 @@ import (
 )
 
 func opArraySize(e *ExecutionEngine) (VMState, error) {
-	item := PopStackItem(e)
+	item := PopStackItem(e) // will pop it
 	if _, ok := item.(*types.Array); ok {
 		a, err := item.GetArray()
 		if err != nil {
@@ -63,14 +63,14 @@ func opUnpack(e *ExecutionEngine) (VMState, error) {
 		return FAULT, err
 	}
 	l := len(arr)
-	for i := l - 1; i >= 0; i-- {
+	for i := l - 1; i >= 0; i-- { //push the last one first. so Pack and UNPack can reverse
 		Push(e, arr[i])
 	}
 	PushData(e, l)
 	return NONE, nil
 }
 
-func opPickItem(e *ExecutionEngine) (VMState, error) {
+func opPickItem(e *ExecutionEngine) (VMState, error) { // args stack bottom {item, index} top  ==> {item[index]}  item can be array, struct, map
 	index := PopStackItem(e)
 	items := PopStackItem(e)
 
@@ -78,7 +78,7 @@ func opPickItem(e *ExecutionEngine) (VMState, error) {
 	case *types.Array:
 		bi, _ := index.GetBigInteger()
 		i := int(bi.Int64())
-		a, _ := items.GetArray()
+		a, _ := items.GetArray() // the array's serialize is more have a len. however struct do not have
 		PushData(e, a[i])
 	case *types.Struct:
 		bi, _ := index.GetBigInteger()
@@ -99,7 +99,7 @@ func opPickItem(e *ExecutionEngine) (VMState, error) {
 
 func opSetItem(e *ExecutionEngine) (VMState, error) {
 	newItem := PopStackItem(e)
-	if value, ok := newItem.(*types.Struct); ok {
+	if value, ok := newItem.(*types.Struct); ok { // when the item is struct
 		var err error
 		newItem, err = value.Clone()
 		if err != nil {
@@ -123,17 +123,17 @@ func opSetItem(e *ExecutionEngine) (VMState, error) {
 		items, _ := item.GetStruct()
 		bi, _ := index.GetBigInteger()
 		i := int(bi.Int64())
-		items[i] = newItem
+		items[i] = newItem //why here not push back to the stack. however the itm pop out of stack.
 	}
 
 	return NONE, nil
 }
 
-func opNewArray(e *ExecutionEngine) (VMState, error) {
+func opNewArray(e *ExecutionEngine) (VMState, error) { // alloc a newArray
 	count, _ := PopInt(e)
 	var items []types.StackItems
 	for i := 0; i < count; i++ {
-		items = append(items, types.NewBoolean(false))
+		items = append(items, types.NewBoolean(false)) //init the all item with NewBoolean
 	}
 	PushData(e, types.NewArray(items))
 	return NONE, nil
@@ -154,7 +154,7 @@ func opNewMap(e *ExecutionEngine) (VMState, error) {
 	return NONE, nil
 }
 
-func opAppend(e *ExecutionEngine) (VMState, error) {
+func opAppend(e *ExecutionEngine) (VMState, error) { // bottom { items(array or struct, newItem) } === add the newItem to iterms
 	newItem := PopStackItem(e)
 	if value, ok := newItem.(*types.Struct); ok {
 		var err error
@@ -173,15 +173,15 @@ func opAppend(e *ExecutionEngine) (VMState, error) {
 	return NONE, nil
 }
 
-func opReverse(e *ExecutionEngine) (VMState, error) {
+func opReverse(e *ExecutionEngine) (VMState, error) { //reverse the array. this is only array
 	itemArr, _ := PopArray(e)
-	for i, j := 0, len(itemArr)-1; i < j; i, j = i+1, j-1 {
+	for i, j := 0, len(itemArr)-1; i < j; i, j = i+1, j-1 { // the same with SETITEM. here not PUSH BACK to stack
 		itemArr[i], itemArr[j] = itemArr[j], itemArr[i]
 	}
 	return NONE, nil
 }
 
-func opRemove(e *ExecutionEngine) (VMState, error) {
+func opRemove(e *ExecutionEngine) (VMState, error) { // this is only for map. bottom { map, index } top ==> remove the map of index element.
 	index := PopStackItem(e)
 	item := PopStackItem(e)
 

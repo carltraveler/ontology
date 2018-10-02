@@ -26,6 +26,10 @@ import (
 	"github.com/syndtr/goleveldb/leveldb/opt"
 	"github.com/syndtr/goleveldb/leveldb/storage"
 	"github.com/syndtr/goleveldb/leveldb/util"
+	//"log"
+	//"fmt"
+	//"runtime"
+	//"runtime/debug"
 )
 
 //LevelDB store
@@ -130,6 +134,14 @@ func (self *LevelDBStore) BatchCommit() error {
 		return err
 	}
 	self.batch = nil
+	//buf := make([]byte, 1<<20)
+	//runtime.Stack(buf, true)
+	//log.Infof("[start all stack]----------------  %s   ----------------[all stack end]", buf)
+	//print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n")
+	//print(buf)
+	//debug.PrintStack()
+	//print("========================================================\n")
+	//fmt.Printf("\n%s", buf)
 	return nil
 }
 

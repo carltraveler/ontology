@@ -261,7 +261,9 @@ func grantOng(native *native.NativeService, contract, address common.Address, ba
 	}
 
 	if balance != 0 {
+		fmt.Printf("balance %d\n", balance)
 		value := utils.CalcUnbindOng(balance, startOffset, endOffset)
+		fmt.Printf("startOffset: %d, endOffset: %d value :%d\n", startOffset, endOffset, value)
 
 		args, err := getApproveArgs(native, contract, utils.OngContractAddress, address, value)
 		if err != nil {
@@ -285,7 +287,7 @@ func getApproveArgs(native *native.NativeService, contract, ongContract, address
 		Value: value,
 	}
 
-	stateValue, err := utils.GetStorageUInt64(native, GenApproveKey(ongContract, approve.From, approve.To))
+	stateValue, err := utils.GetStorageUInt64(native, GenApproveKey(ongContract, approve.From, approve.To)) //so key is ongContract + OntContract+ myselfaccount
 	if err != nil {
 		return nil, err
 	}

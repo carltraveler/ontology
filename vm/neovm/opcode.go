@@ -18,7 +18,7 @@
 
 package neovm
 
-type OpCode byte
+type OpCode byte // avm Opcode is only ONE bytes
 
 const (
 	// Constants

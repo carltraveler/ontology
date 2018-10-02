@@ -73,7 +73,7 @@ func (this *NativeService) Invoke() (interface{}, error) {
 	}
 	args := this.Input
 	this.Input = contract.Args
-	this.ContextRef.PushContext(&context.Context{ContractAddress: contract.Address})
+	this.ContextRef.PushContext(&context.Context{ContractAddress: contract.Address}) // here must be native service address, pass by user smartcontract. push Context first when call Native service
 	notifications := this.Notifications
 	this.Notifications = []*event.NotifyEventInfo{}
 	result, err := service(this)

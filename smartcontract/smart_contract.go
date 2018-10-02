@@ -122,7 +122,7 @@ func (this *SmartContract) checkContexts() bool {
 
 // Execute is smart contract execute manager
 // According different vm type to launch different service
-func (this *SmartContract) NewExecuteEngine(code []byte) (context.Engine, error) {
+func (this *SmartContract) NewExecuteEngine(code []byte) (context.Engine, error) { // the define smartcontract to NeoVmService
 	if !this.checkContexts() {
 		return nil, fmt.Errorf("%s", "engine over max limit!")
 	}

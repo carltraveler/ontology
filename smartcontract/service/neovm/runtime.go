@@ -20,6 +20,7 @@ package neovm
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"reflect"
 	"sort"
@@ -32,6 +33,7 @@ import (
 	scommon "github.com/ontio/ontology/smartcontract/common"
 	"github.com/ontio/ontology/smartcontract/event"
 	vm "github.com/ontio/ontology/vm/neovm"
+	//"github.com/ontio/ontology/vm/neovm/types"
 	vmtypes "github.com/ontio/ontology/vm/neovm/types"
 )
 
@@ -110,6 +112,7 @@ func RuntimeNotify(service *NeoVmService, engine *vm.ExecutionEngine) error {
 
 // RuntimeLog push smart contract execute event log to client
 func RuntimeLog(service *NeoVmService, engine *vm.ExecutionEngine) error {
+	item_t := vm.PeekStackItem(engine)
 	item, err := vm.PopByteArray(engine)
 	if err != nil {
 		return err
@@ -117,6 +120,28 @@ func RuntimeLog(service *NeoVmService, engine *vm.ExecutionEngine) error {
 	context := service.ContextRef.CurrentContext()
 	txHash := service.Tx.Hash()
 	event.PushSmartCodeEvent(txHash, 0, event.EVENT_LOG, &event.LogEventArgs{TxHash: txHash, ContractAddress: context.ContractAddress, Message: string(item)})
+
+	switch item_t.(type) {
+	case *vmtypes.Integer:
+		stackItem := item_t.(*vmtypes.Integer)
+		value, err := stackItem.GetBigInteger()
+		if err != nil {
+			return err
+		}
+		fmt.Printf("Integer: %d\n", value)
+	case *vmtypes.ByteArray:
+		//stackItem = data.(*types.ByteArray)
+		fmt.Printf("string: %s\n", (item))
+		//address, err := common.AddressParseFromBytes(item)
+		//if err != nil {
+		//	return err
+		//}
+		//addr := address.ToBase58()
+		//fmt.Printf("addr: %s\n", addr)
+	default:
+		fmt.Printf("%s\n", "Can not handle this type message")
+	}
+
 	return nil
 }
 

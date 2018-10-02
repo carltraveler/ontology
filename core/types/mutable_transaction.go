@@ -86,9 +86,9 @@ func (tx *MutableTransaction) serialize(sink *common.ZeroCopySink) error {
 		return err
 	}
 
-	sink.WriteVarUint(uint64(len(tx.Sigs)))
+	sink.WriteVarUint(uint64(len(tx.Sigs))) //add len of tx.Sigs
 	for _, sig := range tx.Sigs {
-		err = sig.Serialization(sink)
+		err = sig.Serialization(sink) //所以这里是构造创建 bottom{sigdata, publickey} top   最后运行checkwitness的字节码流
 		if err != nil {
 			return err
 		}
@@ -123,7 +123,7 @@ func (tx *MutableTransaction) serializeUnsigned(sink *common.ZeroCopySink) error
 	default:
 		return errors.New("wrong transaction payload type")
 	}
-	sink.WriteVarUint(uint64(tx.attributes))
+	sink.WriteVarUint(uint64(tx.attributes)) //only Serialized until attribute
 
 	return nil
 }

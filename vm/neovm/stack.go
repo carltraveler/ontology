@@ -38,7 +38,7 @@ func (r *RandomAccessStack) Count() int {
 	return len(r.e)
 }
 
-func (r *RandomAccessStack) Insert(index int, t types.StackItems) {
+func (r *RandomAccessStack) Insert(index int, t types.StackItems) { //insert a Items at index
 	if t == nil {
 		return
 	}
@@ -52,7 +52,7 @@ func (r *RandomAccessStack) Insert(index int, t types.StackItems) {
 	r.e[index] = t
 }
 
-func (r *RandomAccessStack) Peek(index int) types.StackItems {
+func (r *RandomAccessStack) Peek(index int) types.StackItems { // return the index item of the stack(index start from 0, which is the top). but not remove. like choose
 	l := len(r.e)
 	if index >= l {
 		return nil
@@ -68,7 +68,7 @@ func (r *RandomAccessStack) Remove(index int) types.StackItems {
 	}
 	index = l - index
 	e := r.e[index-1]
-	r.e = append(r.e[:index-1], r.e[index:]...)
+	r.e = append(r.e[:index-1], r.e[index:]...) // note index-1 will not add to stack. so remove the index item
 	return e
 }
 
@@ -94,7 +94,7 @@ func (r *RandomAccessStack) Pop() types.StackItems {
 	return res
 }
 
-func (r *RandomAccessStack) Swap(i, j int) {
+func (r *RandomAccessStack) Swap(i, j int) { // swap the i and j item. index is vm index which REVERSE with RandomAccessStack.
 	l := len(r.e)
 	r.e[l-i-1], r.e[l-j-1] = r.e[l-j-1], r.e[l-i-1]
 }
