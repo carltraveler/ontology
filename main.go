@@ -28,6 +28,7 @@ import (
 	"syscall"
 	"time"
 
+	//"flag"
 	"github.com/ontio/ontology-crypto/keypair"
 	"github.com/ontio/ontology-eventbus/actor"
 	alog "github.com/ontio/ontology-eventbus/log"
@@ -58,6 +59,7 @@ import (
 	"github.com/ontio/ontology/validator/stateful"
 	"github.com/ontio/ontology/validator/stateless"
 	"github.com/urfave/cli"
+	"runtime/pprof"
 )
 
 func setupAPP() *cli.App {
@@ -131,7 +133,27 @@ func setupAPP() *cli.App {
 	return app
 }
 
+//var cpuprofile = flag.String("cpuprofile", "", "write cpu profile `file` ")
+//var memprofile = flag.String("memprofile", "", "write memory profile `file` to ")
+
 func main() {
+	//flag.Parse()
+	//fmt.Printf("%s\n", os.Args)
+
+	cpuprofile := "./cpu.prof"
+	if cpuprofile != "" {
+		f, err := os.Create(cpuprofile)
+		if err != nil {
+			log.Fatal("could not create CPU profile: ", err)
+
+		}
+		if err := pprof.StartCPUProfile(f); err != nil {
+			log.Fatal("could not start CPU profile: ", err)
+
+		}
+		defer pprof.StopCPUProfile()
+	}
+
 	if err := setupAPP().Run(os.Args); err != nil {
 		cmd.PrintErrorMsg(err.Error())
 		os.Exit(1)

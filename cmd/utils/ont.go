@@ -128,7 +128,7 @@ func Transfer(gasPrice, gasLimit uint64, signer *account.Account, asset, from, t
 	if err != nil {
 		return "", fmt.Errorf("convert immutable transaction error:%s", err)
 	}
-	txHash, err := SendRawTransaction(tx)
+	txHash, err := SendRawTransaction(tx) // if only send MutableTransaction with Serialized data(that is RAW Transaction). why above get tx?  at the RPC server sendrawtransaction construct Transaction form raw Transaction
 	if err != nil {
 		return "", fmt.Errorf("SendTransaction error:%s", err)
 	}
@@ -237,7 +237,7 @@ func TransferTx(gasPrice, gasLimit uint64, asset, from, to string, amount uint64
 	default:
 		return nil, fmt.Errorf("unsupport asset:%s", asset)
 	}
-	invokeCode, err := httpcom.BuildNativeInvokeCode(contractAddr, version, CONTRACT_TRANSFER, []interface{}{sts})
+	invokeCode, err := httpcom.BuildNativeInvokeCode(contractAddr, version, CONTRACT_TRANSFER, []interface{}{sts}) //普通的转账，生成syscall inovke。并生成参数构造字节码
 	if err != nil {
 		return nil, fmt.Errorf("build invoke code error:%s", err)
 	}
@@ -325,7 +325,7 @@ func SignTransaction(signer *account.Account, tx *types.MutableTransaction) erro
 		tx.Sigs = append(tx.Sigs, types.Sig{
 			PubKeys: []keypair.PublicKey{signer.PublicKey},
 			M:       1,
-			SigData: [][]byte{sigData},
+			SigData: [][]byte{sigData}, //why here can from one dimension to two dimension
 		})
 	}
 	return nil

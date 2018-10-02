@@ -18,7 +18,7 @@
 
 package neovm
 
-func opCat(e *ExecutionEngine) (VMState, error) {
+func opCat(e *ExecutionEngine) (VMState, error) { // like string cat
 	b2, err := PopByteArray(e)
 	if err != nil {
 		return FAULT, err
@@ -32,7 +32,7 @@ func opCat(e *ExecutionEngine) (VMState, error) {
 	return NONE, nil
 }
 
-func opSubStr(e *ExecutionEngine) (VMState, error) {
+func opSubStr(e *ExecutionEngine) (VMState, error) { // like array slice. bottom{ByteArray, index, count} top ===> bottom {ByteArray[index : index+count]}
 	count, err := PopInt(e)
 	if err != nil {
 		return FAULT, err

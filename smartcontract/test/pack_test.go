@@ -26,7 +26,8 @@ import (
 	"testing"
 )
 
-func TestPackCrash(t *testing.T) {
+//func TestPackCrash(t *testing.T) {
+func main() {
 	// define a leaf
 	byteCode := []byte{byte(neovm.PUSH0)}
 

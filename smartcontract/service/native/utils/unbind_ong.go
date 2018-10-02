@@ -33,13 +33,13 @@ func CalcUnbindOng(balance uint64, startOffset, endOffset uint32) uint64 {
 		return 0
 	}
 	if startOffset < constants.UNBOUND_DEADLINE {
-		ustart := startOffset / TIME_INTERVAL
-		istart := startOffset % TIME_INTERVAL
+		ustart := startOffset / TIME_INTERVAL //get years start
+		istart := startOffset % TIME_INTERVAL //get seconds in start year
 		if endOffset >= constants.UNBOUND_DEADLINE {
 			endOffset = constants.UNBOUND_DEADLINE
 		}
-		uend := endOffset / TIME_INTERVAL
-		iend := endOffset % TIME_INTERVAL
+		uend := endOffset / TIME_INTERVAL //get years end
+		iend := endOffset % TIME_INTERVAL //get seconds in end year
 		for ustart < uend {
 			amount += uint64(TIME_INTERVAL-istart) * GENERATION_AMOUNT[ustart]
 			ustart++
@@ -48,5 +48,5 @@ func CalcUnbindOng(balance uint64, startOffset, endOffset uint32) uint64 {
 		amount += uint64(iend-istart) * GENERATION_AMOUNT[ustart]
 	}
 
-	return uint64(amount) * balance
+	return uint64(amount) * balance //here just * balance is becasuse amount is use num ong count. but it's precision is more 10^9 point. so acctual ong amount is amount * balance/ 10^9 = amount * balance(ont) / TOTAL_ONT_SUPPLY
 }

@@ -27,7 +27,7 @@ import (
 	"github.com/ontio/ontology/vm/neovm/interfaces"
 )
 
-type ByteArray struct {
+type ByteArray struct { // stackItem can be any basic struct in neovm
 	value []byte
 }
 

@@ -55,13 +55,21 @@ func (self *ProgramBuilder) PushNum(num uint16) *ProgramBuilder {
 	return self.PushBytes(common.BigIntToNeoBytes(bint))
 }
 
+// ProgramBuilder is generates bytecode to buf
 func (self *ProgramBuilder) PushBytes(data []byte) *ProgramBuilder {
 	if len(data) == 0 {
 		panic("push data error: data is nil")
 	}
+	/*so here contruct op code
+
+	PUSHDATAX/PUSHBYTESX
+	len of data if opcode need
+	data
+
+	*/
 
 	if len(data) <= int(neovm.PUSHBYTES75)+1-int(neovm.PUSHBYTES1) {
-		self.sink.WriteByte(byte(len(data)) + byte(neovm.PUSHBYTES1) - 1)
+		self.sink.WriteByte(byte(len(data)) + byte(neovm.PUSHBYTES1) - 1) // the opcode equal len(data)
 	} else if len(data) < 0x100 {
 		self.sink.WriteByte(byte(neovm.PUSHDATA1))
 		self.sink.WriteUint8(uint8(len(data)))
@@ -135,7 +143,7 @@ func ProgramFromParams(sigs [][]byte) []byte {
 func EncodeParamProgramInto(sink *common.ZeroCopySink, sigs [][]byte) {
 	builder := ProgramBuilder{sink: sink}
 	for _, sig := range sigs {
-		builder.PushBytes(sig)
+		builder.PushBytes(sig) // just generate push the signature in the evalation stack
 	}
 }
 

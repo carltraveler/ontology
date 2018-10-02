@@ -31,6 +31,7 @@ import (
 	p2pComm "github.com/ontio/ontology/p2pserver/common"
 	"github.com/ontio/ontology/p2pserver/message/msg_pack"
 	"github.com/ontio/ontology/p2pserver/peer"
+	"runtime/debug"
 )
 
 const (
@@ -251,6 +252,7 @@ func NewBlockSyncMgr(server *P2PServer) *BlockSyncMgr {
 func (this *BlockSyncMgr) Start() {
 	go this.sync()
 	ticker := time.NewTicker(time.Second)
+	debug.PrintStack()
 	for {
 		select {
 		case <-this.exitCh:

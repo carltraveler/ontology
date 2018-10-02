@@ -26,7 +26,7 @@ import (
 )
 
 type Array struct {
-	_array []StackItems
+	_array []StackItems // note ByteArray is different with array. ByteArray is pure bytes. however Array can save any stackItem
 }
 
 func NewArray(value []StackItems) *Array {

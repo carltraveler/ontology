@@ -91,7 +91,7 @@ func (this *Map) GetMap() (map[StackItems]StackItems, error) {
 }
 
 func (this *Map) TryGetValue(key StackItems) StackItems {
-	for k, v := range this._map {
+	for k, v := range this._map { //map can
 		if k.Equals(key) {
 			return v
 		}

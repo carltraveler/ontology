@@ -31,6 +31,7 @@ import (
 	"github.com/ontio/ontology/common/serialization"
 	"github.com/ontio/ontology/core/payload"
 	"github.com/ontio/ontology/core/program"
+	"github.com/ontio/ontology/smartcontract/test/makemap"
 )
 
 const MAX_TX_SIZE = 1024 * 1024 // The max size of a transaction to prevent DOS attacks
@@ -47,7 +48,7 @@ type Transaction struct {
 	attributes byte //this must be 0 now, Attribute Array length use VarUint encoding, so byte is enough for extension
 	Sigs       []RawSig
 
-	Raw []byte // raw transaction data
+	Raw []byte // raw transaction data. MutableTransaction Serialized data
 
 	hash       common.Uint256
 	SignedAddr []common.Address // this is assigned when passed signature verification
@@ -78,13 +79,13 @@ func (tx *Transaction) Deserialization(source *common.ZeroCopySource) error {
 	}
 	pos := source.Pos()
 	lenUnsigned := pos - pstart
-	source.BackUp(lenUnsigned)
-	rawUnsigned, _ := source.NextBytes(lenUnsigned)
+	source.BackUp(lenUnsigned)                      //goto start data offset
+	rawUnsigned, _ := source.NextBytes(lenUnsigned) //MutableTransaction Serialized data
 	temp := sha256.Sum256(rawUnsigned)
-	tx.hash = common.Uint256(sha256.Sum256(temp[:]))
+	tx.hash = common.Uint256(sha256.Sum256(temp[:])) //so hash value is only related wiht MutableTransaction Serialized data
 
 	// tx sigs
-	length, _, irregular, eof := source.NextVarUint()
+	length, _, irregular, eof := source.NextVarUint() //get the length of tx.Sigs form MutableTransaction
 	if irregular {
 		return common.ErrIrregularData
 	}
@@ -96,19 +97,19 @@ func (tx *Transaction) Deserialization(source *common.ZeroCopySource) error {
 	}
 
 	for i := 0; i < int(length); i++ {
-		var sig RawSig
-		err := sig.Deserialization(source)
+		var sig RawSig                     // so here must check how MutableTransaction sig data's Serialization
+		err := sig.Deserialization(source) // MutableTransaction sig Serialized data data to Transaction RawSig
 		if err != nil {
 			return err
 		}
 
-		tx.Sigs = append(tx.Sigs, sig)
+		tx.Sigs = append(tx.Sigs, sig) // due to sig is from PrivateKey+tx.hash. and tx.hash only concen data before attribute. so here is same with MutableTransaction sigs
 	}
 
 	pend := source.Pos()
 	lenAll := pend - pstart
-	source.BackUp(lenAll)
-	tx.Raw, _ = source.NextBytes(lenAll)
+	source.BackUp(lenAll)                // back to start again
+	tx.Raw, _ = source.NextBytes(lenAll) // the the difference between before sign of MutableTransaction to immutable and after sign of MutableTransaction to immutable transaction is the raw data. the after ones raw data is MutableTransaction with sign. and the sign it PrivateKey + tx.hash. tx.hash only concern MutableTransaction without sig
 
 	tx.nonDirectConstracted = true
 
@@ -138,7 +139,7 @@ func (tx *Transaction) IntoMutable() (*MutableTransaction, error) {
 	return mutable, nil
 }
 
-func (tx *Transaction) deserializationUnsigned(source *common.ZeroCopySource) error {
+func (tx *Transaction) deserializationUnsigned(source *common.ZeroCopySource) error { //this Deserialize until attribute element
 	var irregular, eof bool
 	tx.Version, eof = source.NextByte()
 	var txtype byte
@@ -286,7 +287,7 @@ func (self *RawSig) GetSig() (Sig, error) {
 
 func (self *Sig) Serialization(sink *common.ZeroCopySink) error {
 	temp := common.NewZeroCopySink(nil)
-	program.EncodeParamProgramInto(temp, self.SigData)
+	program.EncodeParamProgramInto(temp, self.SigData) // so here SigData is generates the pushed to evalation stack code
 	sink.WriteVarBytes(temp.Bytes())
 
 	temp.Reset()
@@ -301,6 +302,8 @@ func (self *Sig) Serialization(sink *common.ZeroCopySink) error {
 		}
 	}
 	sink.WriteVarBytes(temp.Bytes())
+
+	makemap.Dumpcode(sink.Bytes())
 
 	return nil
 }
@@ -400,7 +403,7 @@ func (tx *Transaction) Serialize(w io.Writer) error {
 	if tx.nonDirectConstracted == false || len(tx.Raw) == 0 {
 		panic("wrong constructed transaction")
 	}
-	_, err := w.Write(tx.Raw)
+	_, err := w.Write(tx.Raw) // send out the tx.Raw
 	return err
 }
 

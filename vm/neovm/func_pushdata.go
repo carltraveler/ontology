@@ -24,7 +24,7 @@ func opPushData(e *ExecutionEngine) (VMState, error) {
 	return NONE, nil
 }
 
-func getPushData(e *ExecutionEngine) interface{} {
+func getPushData(e *ExecutionEngine) interface{} { // get data need to pushed on the stack. the data is in avm or just absolute number
 	var data interface{}
 	if e.OpCode >= PUSHBYTES1 && e.OpCode <= PUSHBYTES75 {
 		data = e.Context.OpReader.ReadBytes(int(e.OpCode))

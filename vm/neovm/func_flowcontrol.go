@@ -26,22 +26,22 @@ func opNop(e *ExecutionEngine) (VMState, error) {
 	return NONE, nil
 }
 
-func opJmp(e *ExecutionEngine) (VMState, error) {
+func opJmp(e *ExecutionEngine) (VMState, error) { // jmp offset is saved in avm jump OPCODE next 2 bytes
 	offset := int(e.Context.OpReader.ReadInt16())
 
-	offset = e.Context.GetInstructionPointer() + offset - 3
+	offset = e.Context.GetInstructionPointer() + offset - 3 // calculate the target addr, affset is not a relative address, but a absolute address. so must bigger than 0
 
-	if offset < 0 || offset > len(e.Context.Code) {
+	if offset < 0 || offset > len(e.Context.Code) { // offset < 0 indicate can not jmp back? why?
 		return FAULT, errors.ERR_FAULT
 	}
 	var fValue = true
 
-	if e.OpCode > JMP {
+	if e.OpCode > JMP { // if jump is not absolute JMP. it JMPIF or JMPIFNOT
 		if EvaluationStackCount(e) < 1 {
 			return FAULT, errors.ERR_UNDER_STACK_LEN
 		}
 		var err error
-		fValue, err = PopBoolean(e)
+		fValue, err = PopBoolean(e) // JMPIF JMPIFNOT have a Boolean arg in stack
 		if err != nil {
 			return FAULT, err
 		}
@@ -50,21 +50,21 @@ func opJmp(e *ExecutionEngine) (VMState, error) {
 		}
 	}
 
-	if fValue {
-		e.Context.SetInstructionPointer(int64(offset))
+	if fValue { //if fValue not set the new pc(offset) is not set to vm
+		e.Context.SetInstructionPointer(int64(offset)) // so InstructionPointer is always indicate the next instr to exec. when in OPEXEC code. the position is must be the nest instr addr
 	}
 	return NONE, nil
 }
 
 func opCall(e *ExecutionEngine) (VMState, error) {
 	context := e.Context.Clone()
-	e.Context.SetInstructionPointer(int64(e.Context.GetInstructionPointer() + 2))
-	e.OpCode = JMP
-	e.PushContext(context)
+	e.Context.SetInstructionPointer(int64(e.Context.GetInstructionPointer() + 2)) // set the old context's return InstructionPointer. due after CALL avm have 2 bytes. so return addr need +2
+	e.OpCode = JMP                                                                // absolute JMP
+	e.PushContext(context)                                                        // PushContext will update e.Context to the new context. note, the new context's context InstructionPointer was not changed (first cloned). just update the CALL opcode ===> JMP Opcode. so after 2 bytes is for the JMP opcode offset.
 	return opJmp(e)
 }
 
 func opRet(e *ExecutionEngine) (VMState, error) {
-	e.PopContext()
+	e.PopContext() // will update the current context to prev Context which saved the prev postion after opCALL + 3 bytes.
 	return NONE, nil
 }

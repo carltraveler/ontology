@@ -19,7 +19,9 @@
 package neovm
 
 import (
+	//"fmt"
 	"github.com/ontio/ontology/vm/neovm/errors"
+	"runtime/debug"
 )
 
 func NewExecutionEngine() *ExecutionEngine {
@@ -65,6 +67,7 @@ func (this *ExecutionEngine) Execute() error {
 		if this.State == FAULT || this.State == HALT || this.State == BREAK {
 			break
 		}
+		debug.PrintStack()
 		err := this.StepInto()
 		if err != nil {
 			return err
@@ -112,5 +115,8 @@ func (this *ExecutionEngine) ExecuteOp() (VMState, error) {
 			return FAULT, err
 		}
 	}
+	//debug.PrintStack()
+	//print("xxxxxxxxxxxxxxx==========================\n")
+	//Printf("")
 	return this.OpExec.Exec(this)
 }
