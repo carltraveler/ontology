@@ -23,7 +23,7 @@ import (
 	//"github.com/ontio/ontology/common"
 	"github.com/ontio/ontology/core/types"
 	. "github.com/ontio/ontology/smartcontract"
-	"github.com/ontio/ontology/smartcontract/test/makemap"
+	//"github.com/ontio/ontology/smartcontract/test/makemap"
 	"io/ioutil"
 	//"os"
 	//"strings"
@@ -35,9 +35,11 @@ func main() {
 	//codeFile := "/home/steven/github/neo-boa/AddTest1.avm"
 	//codeFile := "/home/steven/github/neo-boa/testA.avm"
 	//codeFile := "/home/steven/github/neo-boa/test0.avm"
-	codeFile := "/home/steven/github/neo-boa/lottery.avm"
+	//codeFile := "/home/steven/github/neo-boa/lottery.avm"
+	//codeFile := "/home/steven/github/neo-boa/test1.avm"
+	codeFile := "/home/steven/github/neo-boa/testdata/funcall.avm"
 
-	makemap.Makemap()
+	//makemap.Makemap()
 
 	codeStr, err := ioutil.ReadFile(codeFile)
 	//fmt.Printf("%x", (codeStr))
@@ -88,7 +90,8 @@ func main() {
 
 	if err != nil {
 		//t.Fatal(err)
-		print("ERROR runned\n", err)
+		fmt.Printf("ERROR runned: %s\n", err)
+		return
 	}
 
 	print("all done\n")

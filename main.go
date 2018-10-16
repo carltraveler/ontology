@@ -69,7 +69,7 @@ func setupAPP() *cli.App {
 	app.Version = config.Version
 	app.Copyright = "Copyright in 2018 The Ontology Authors"
 	app.Commands = []cli.Command{
-		cmd.AccountCommand,
+		cmd.AccountCommand, //设置命令
 		cmd.InfoCommand,
 		cmd.AssetCommand,
 		cmd.ContractCommand,

@@ -66,7 +66,7 @@ type roundRobinState struct {
 
 type registerValidators struct {
 	sync.RWMutex
-	entries map[types.VerifyType][]*types.RegisterValidator // Registered validator container
+	entries map[types.VerifyType][]*types.RegisterValidator // Registered validator container 元素是数组的原因是同一个type可以注册多个Validator
 	state   roundRobinState                                 // For loadbance
 }
 
@@ -445,7 +445,7 @@ func (s *TXPoolServer) getNextValidatorPIDs() []*actor.PID {
 	}
 
 	ret := make([]*actor.PID, 0, len(s.validators.entries))
-	for k, v := range s.validators.entries {
+	for k, v := range s.validators.entries { //更新每个type的下一个validator pid。并返回
 		lastIdx := s.validators.state.state[k]
 		next := (lastIdx + 1) % len(v)
 		s.validators.state.state[k] = next

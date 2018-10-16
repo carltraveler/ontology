@@ -50,7 +50,7 @@ func AppendTxToPool(txn *types.Transaction) (ontErrors.ErrCode, string) {
 		return ontErrors.ErrNoError, ""
 	}
 	//add Pre Execute Contract
-	_, err := PreExecuteContract(txn)
+	_, err := PreExecuteContract(txn) //rpc server接到的时候这里做了预执行，那链同步怎么办
 	if err != nil {
 		return ontErrors.ErrUnknown, err.Error()
 	}

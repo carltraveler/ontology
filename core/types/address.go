@@ -27,7 +27,7 @@ import (
 	"github.com/ontio/ontology/core/program"
 )
 
-func AddressFromPubKey(pubkey keypair.PublicKey) common.Address {
+func AddressFromPubKey(pubkey keypair.PublicKey) common.Address { //该函数首先把
 	prog := program.ProgramFromPubKey(pubkey)
 
 	return common.AddressFromVmCode(prog)

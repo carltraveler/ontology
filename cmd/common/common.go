@@ -46,12 +46,12 @@ func GetPasswd(ctx *cli.Context) ([]byte, error) {
 func OpenWallet(ctx *cli.Context) (account.Client, error) {
 	walletFile := ctx.String(utils.GetFlagName(utils.WalletFileFlag))
 	if walletFile == "" {
-		walletFile = config.DEFAULT_WALLET_FILE_NAME
+		walletFile = config.DEFAULT_WALLET_FILE_NAME //默认是./wallet.data
 	}
 	if !common.FileExisted(walletFile) {
 		return nil, fmt.Errorf("cannot find wallet file:%s", walletFile)
 	}
-	wallet, err := account.Open(walletFile)
+	wallet, err := account.Open(walletFile) //读取walletFile，构造account.Client结构体,可以发现，实际上是一个json文件
 	if err != nil {
 		return nil, err
 	}

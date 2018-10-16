@@ -136,7 +136,7 @@ var AssetCommand = cli.Command{
 
 func transfer(ctx *cli.Context) error {
 	SetRpcPort(ctx)
-	if !ctx.IsSet(utils.GetFlagName(utils.TransactionToFlag)) ||
+	if !ctx.IsSet(utils.GetFlagName(utils.TransactionToFlag)) || // from to amount一定要被设置
 		!ctx.IsSet(utils.GetFlagName(utils.TransactionFromFlag)) ||
 		!ctx.IsSet(utils.GetFlagName(utils.TransactionAmountFlag)) {
 		PrintErrorMsg("Missing %s %s or %s argument.", utils.TransactionToFlag.Name, utils.TransactionFromFlag.Name, utils.TransactionAmountFlag.Name)
@@ -203,7 +203,7 @@ func transfer(ctx *cli.Context) error {
 	}
 
 	var signer *account.Account
-	signer, err = cmdcom.GetAccount(ctx, fromAddr)
+	signer, err = cmdcom.GetAccount(ctx, fromAddr) //通过from地址， 获取包括私钥的签名者所有信息
 	if err != nil {
 		return err
 	}
