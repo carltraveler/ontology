@@ -362,13 +362,13 @@ func CheckVBFTConfig(configuration *config.VBFTConfig) error {
 	indexMap := make(map[uint32]struct{})
 	peerPubkeyMap := make(map[string]struct{})
 	for _, peer := range configuration.Peers {
-		_, ok := indexMap[peer.Index]
+		_, ok := indexMap[peer.Index] //如果可以索引到， 说明已经存在，重复了
 		if ok {
 			return fmt.Errorf("initConfig, peer index is duplicated")
 		}
 		indexMap[peer.Index] = struct{}{}
 
-		_, ok = peerPubkeyMap[peer.PeerPubkey]
+		_, ok = peerPubkeyMap[peer.PeerPubkey] //同peer.Index，检查重复
 		if ok {
 			return fmt.Errorf("initConfig, peerPubkey is duplicated")
 		}

@@ -93,7 +93,7 @@ func (self *validator) VerifyType() vatypes.VerifyType {
 // Register send RegisterValidator message to txpool
 func (self *validator) Register(poolId *actor.PID) {
 	poolId.Tell(&vatypes.RegisterValidator{
-		Sender: self.pid,
+		Sender: self.pid, //就是validator pid本身
 		Type:   self.VerifyType(),
 		Id:     self.id,
 	})

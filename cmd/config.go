@@ -86,7 +86,7 @@ func setGenesis(ctx *cli.Context, cfg *config.OntologyConfig) error {
 		return nil
 	}
 
-	genesisFile := ctx.String(utils.GetFlagName(utils.ConfigFlag))
+	genesisFile := ctx.String(utils.GetFlagName(utils.ConfigFlag)) //如果指定了config,关键是怎么构造类似mainnet的config数据.
 	if !common.FileExisted(genesisFile) {
 		return nil
 	}

@@ -325,7 +325,7 @@ func SignTransaction(signer *account.Account, tx *types.MutableTransaction) erro
 		tx.Sigs = append(tx.Sigs, types.Sig{
 			PubKeys: []keypair.PublicKey{signer.PublicKey},
 			M:       1,
-			SigData: [][]byte{sigData}, //why here can from one dimension to two dimension
+			SigData: [][]byte{sigData}, //why here can from one dimension to two dimension, 二维数组的原因是sigData本身就是byte数组， 而Sigs包括多个签名，也就是多个byte数组，所以是二维byte数组
 		})
 	}
 	return nil

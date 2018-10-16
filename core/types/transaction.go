@@ -31,7 +31,8 @@ import (
 	"github.com/ontio/ontology/common/serialization"
 	"github.com/ontio/ontology/core/payload"
 	"github.com/ontio/ontology/core/program"
-	"github.com/ontio/ontology/smartcontract/test/makemap"
+	//"github.com/ontio/ontology/smartcontract/test/makemap"
+	//"runtime/debug"
 )
 
 const MAX_TX_SIZE = 1024 * 1024 // The max size of a transaction to prevent DOS attacks
@@ -78,7 +79,7 @@ func (tx *Transaction) Deserialization(source *common.ZeroCopySource) error {
 		return err
 	}
 	pos := source.Pos()
-	lenUnsigned := pos - pstart
+	lenUnsigned := pos - pstart                     //只到attribute部分,hash值也只依赖这个部分
 	source.BackUp(lenUnsigned)                      //goto start data offset
 	rawUnsigned, _ := source.NextBytes(lenUnsigned) //MutableTransaction Serialized data
 	temp := sha256.Sum256(rawUnsigned)
@@ -245,6 +246,10 @@ func (self *RawSig) Deserialization(source *common.ZeroCopySource) error {
 		return io.ErrUnexpectedEOF
 	}
 
+	//makemap.Dumpcode(self.Invoke, "Dump Invoke\n")
+	//makemap.Dumpcode(self.Verify, "Dump Verify\n")
+	//debug.PrintStack()
+
 	return nil
 }
 
@@ -272,7 +277,8 @@ func (self *Sig) GetRawSig() (*RawSig, error) {
 	return &RawSig{Invoke: invocationScript, Verify: verificationScript}, nil
 }
 
-func (self *RawSig) GetSig() (Sig, error) {
+func (self *RawSig) GetSig() (Sig, error) { //根据Inoke和Verfy指令流，里面保存了sigdata和公钥。sigdata是hash + 私钥的签名, 拿到这些数据后， 只需要用公钥解出hash数据，并比较当前的Transaction数据，就知道是否已经被人修改
+	//debug.PrintStack()
 	sigs, err := program.GetParamInfo(self.Invoke)
 	if err != nil {
 		return Sig{}, err
@@ -286,9 +292,11 @@ func (self *RawSig) GetSig() (Sig, error) {
 }
 
 func (self *Sig) Serialization(sink *common.ZeroCopySink) error {
-	temp := common.NewZeroCopySink(nil)
+	temp := common.NewZeroCopySink(nil)                //这里的SigData是通过MutableTransaction的不包括sig的hash，私钥签名来的, Transaction中raw Transaction的概念和MutableTransaction的序列化数据对应
 	program.EncodeParamProgramInto(temp, self.SigData) // so here SigData is generates the pushed to evalation stack code
-	sink.WriteVarBytes(temp.Bytes())
+	sink.WriteVarBytes(temp.Bytes())                   //这里是通过两次WriteVarBytes写入的,所以再Deserialize的时候可以通过NextVarBytes读出来
+
+	//makemap.Dumpcode(temp.Bytes(), "DUMP ORIG SIGNATURE0\n")
 
 	temp.Reset()
 	if len(self.PubKeys) == 0 {
@@ -303,7 +311,9 @@ func (self *Sig) Serialization(sink *common.ZeroCopySink) error {
 	}
 	sink.WriteVarBytes(temp.Bytes())
 
-	makemap.Dumpcode(sink.Bytes())
+	//fmt.Printf("%d\n", len(sink.Bytes()))
+	//makemap.Dumpcode(temp.Bytes(), "DUMP ORIG SIGNATURE1\n")
+	//debug.PrintStack()
 
 	return nil
 }
@@ -363,7 +373,7 @@ func (self *Transaction) GetSignatureAddresses() ([]common.Address, error) {
 	if len(self.SignedAddr) == 0 {
 		addrs := make([]common.Address, 0, len(self.Sigs))
 		for _, prog := range self.Sigs {
-			addrs = append(addrs, common.AddressFromVmCode(prog.Verify))
+			addrs = append(addrs, common.AddressFromVmCode(prog.Verify)) //其实prog.Verfy就是AddressFromPubKey通过序列化的公钥数据生成的avm指令流
 		}
 		self.SignedAddr = addrs
 	}

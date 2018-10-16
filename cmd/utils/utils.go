@@ -103,7 +103,7 @@ func GetJsonObjectFromFile(filePath string, jsonObject interface{}) error {
 		return err
 	}
 	// Remove the UTF-8 Byte Order Mark
-	data = bytes.TrimPrefix(data, []byte("\xef\xbb\xbf"))
+	data = bytes.TrimPrefix(data, []byte("\xef\xbb\xbf")) //这里为什么有这个头，谁编码加进去的
 
 	err = json.Unmarshal(data, jsonObject)
 	if err != nil {

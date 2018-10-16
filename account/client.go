@@ -109,7 +109,7 @@ func NewClientImpl(path string) (*ClientImpl, error) {
 		walletData: NewWalletData(),
 	}
 	if common.FileExisted(path) {
-		err := cli.load()
+		err := cli.load() //加载钱包数据，实际上是个json文件, 该文件是WalletData经过json.Marshal后的数据
 		if err != nil {
 			return nil, err
 		}
@@ -309,6 +309,7 @@ func (this *ClientImpl) GetDefaultAccountMetadata() *AccountMetadata {
 	return nil
 }
 
+//将AccountData 转化为Account(显示的私钥以及其他信息)
 func (this *ClientImpl) getAccount(accData *AccountData, passwd []byte) (*Account, error) {
 	privateKey, err := keypair.DecryptWithCustomScrypt(&accData.ProtectedKey, passwd, this.walletData.Scrypt)
 	if err != nil {

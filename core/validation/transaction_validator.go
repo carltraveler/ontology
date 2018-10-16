@@ -30,6 +30,7 @@ import (
 	"github.com/ontio/ontology/core/signature"
 	"github.com/ontio/ontology/core/types"
 	ontErrors "github.com/ontio/ontology/errors"
+	//"runtime/debug"
 )
 
 // VerifyTransaction verifys received single transaction
@@ -75,8 +76,9 @@ func checkTransactionSignatures(tx *types.Transaction) error {
 			return errors.New("wrong tx sig param length")
 		}
 
+		//debug.PrintStack()
 		if kn == 1 {
-			err := signature.Verify(sig.PubKeys[0], hash[:], sig.SigData[0])
+			err := signature.Verify(sig.PubKeys[0], hash[:], sig.SigData[0]) //这里进行签名验证
 			if err != nil {
 				return errors.New("signature verification failed")
 			}

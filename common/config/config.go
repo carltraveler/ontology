@@ -531,7 +531,7 @@ type WebSocketConfig struct {
 }
 
 type OntologyConfig struct {
-	Genesis   *GenesisConfig
+	Genesis   *GenesisConfig //创世块
 	Common    *CommonConfig
 	Consensus *ConsensusConfig
 	P2PNode   *P2PNodeConfig
@@ -542,7 +542,7 @@ type OntologyConfig struct {
 
 func NewOntologyConfig() *OntologyConfig {
 	return &OntologyConfig{
-		Genesis: MainNetConfig,
+		Genesis: MainNetConfig, //还有一个PolarisConfig
 		Common: &CommonConfig{
 			LogLevel:       DEFAULT_LOG_LEVEL,
 			EnableEventLog: DEFAULT_ENABLE_EVENT_LOG,

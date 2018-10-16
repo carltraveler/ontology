@@ -237,7 +237,7 @@ func (worker *txPoolWorker) sendReq2Validator(req *types.CheckTx) bool {
 		return false
 	}
 	for _, pid := range pids {
-		pid.Request(req, rspPid)
+		pid.Request(req, rspPid) //第二个参数是validator验证完后, 发送消息到的actior
 	}
 
 	return true

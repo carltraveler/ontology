@@ -9,29 +9,78 @@ import (
 type OpCode byte
 
 var Codemap map[vm.OpCode]string
+var DEBUGMODE_MAP = false
 
-func Dumpcode(code []byte) {
+func getPushData(OpCode vm.OpCode, OpReader *utils.VmReader) interface{} { // get data need to pushed on the stack. the data is in avm or just absolute number
+	var data interface{}
+	if OpCode >= vm.PUSHBYTES1 && OpCode <= vm.PUSHBYTES75 {
+		data = OpReader.ReadBytes(int(OpCode))
+	}
+	switch OpCode {
+	case vm.PUSH0:
+		data = int8(0)
+	case vm.PUSHDATA1:
+		d, _ := OpReader.ReadByte()
+		data = OpReader.ReadBytes(int(d))
+	case vm.PUSHDATA2:
+		data = OpReader.ReadBytes(int(OpReader.ReadUint16()))
+	case vm.PUSHDATA4:
+		i := int(OpReader.ReadInt32())
+		data = OpReader.ReadBytes(i)
+	case vm.PUSHM1, vm.PUSH1, vm.PUSH2, vm.PUSH3, vm.PUSH4, vm.PUSH5, vm.PUSH6, vm.PUSH7, vm.PUSH8, vm.PUSH9, vm.PUSH10, vm.PUSH11, vm.PUSH12, vm.PUSH13, vm.PUSH14, vm.PUSH15, vm.PUSH16:
+		data = int8(OpCode - vm.PUSH1 + 1)
+	}
+
+	return data
+}
+
+func Dumpcode(code []byte, str string) {
 	var OpReader *utils.VmReader
+	OpReader = utils.NewVmReader(code)
+	var result interface{}
+	fmt.Printf(str)
+	fmt.Printf("Code Len: %d\n", len(code))
 	for true {
-		OpReader = utils.NewVmReader(code)
+		result = nil
+
 		OpName, err := OpReader.ReadByte()
+
 		if err != nil {
 			fmt.Printf("READByte ERROR\n")
 			return
 		}
 		OP := vm.OpCode(OpName)
+		fmt.Printf("offset: %d \t OpCode:0x%x \t OpName:", OpReader.Position()-1, OP)
 
-		position := OpReader.Position()
-		fmt.Printf("Position:%d, len:%d\n", position, len(code))
-		if position >= len(code) {
-			break
+		switch OP {
+		case vm.SYSCALL:
+			serviceName := OpReader.ReadVarString(vm.MAX_BYTEARRAY_SIZE)
+			result = serviceName
+		case vm.APPCALL:
+			address := OpReader.ReadBytes(20)
+			result = address
+		}
+		if OP >= vm.PUSH0 && OP <= vm.PUSH16 {
+			data := getPushData(OP, OpReader)
+			result = data
+		} else if OP >= vm.JMP && OP <= vm.CALL {
+			offset := int(OpReader.ReadInt16())
+			result = offset
 		}
 
-		fmt.Printf("offset: %d  OpCode:%d  OpName:", OpReader.Position(), OP)
+		position := OpReader.Position()
 		if OP >= vm.PUSHBYTES1 && OP <= vm.PUSHBYTES75 {
-			fmt.Printf("%s%d\n", "PUSHBYTES", OP)
+			fmt.Printf("%s%d \t 0x%x\n", "PUSHBYTES", OP, result)
+		} else if OP <= 0xFF {
+			fmt.Printf("%s \t 0x%x\n", Codemap[OP], result)
 		} else {
-			fmt.Printf("%s\n", Codemap[OP])
+			fmt.Printf("ERROR CODE\n")
+			return
+		}
+
+		if position >= len(code) {
+			fmt.Printf("End of Parse\n\n")
+			break
 		}
 	}
 	return
@@ -39,7 +88,6 @@ func Dumpcode(code []byte) {
 
 //func Makemap() {}
 func init() {
-	print("init makemap xxxxxxxxxxxxxxxxxx\n")
 	Codemap = map[vm.OpCode]string{
 		0x00: "PUSH0",
 		0x01: "PUSHBYTES1",

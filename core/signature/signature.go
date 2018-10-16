@@ -22,6 +22,7 @@ import (
 	"errors"
 	"github.com/ontio/ontology-crypto/keypair"
 	s "github.com/ontio/ontology-crypto/signature"
+	//"runtime/debug"
 )
 
 // Sign returns the signature of data using privKey
@@ -44,6 +45,8 @@ func Verify(pubKey keypair.PublicKey, data, signature []byte) error {
 	if !s.Verify(pubKey, data, sigObj) {
 		return errors.New("signature verification failed")
 	}
+
+	//debug.PrintStack()
 
 	return nil
 }

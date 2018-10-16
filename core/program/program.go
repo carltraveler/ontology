@@ -55,6 +55,7 @@ func (self *ProgramBuilder) PushNum(num uint16) *ProgramBuilder {
 	return self.PushBytes(common.BigIntToNeoBytes(bint))
 }
 
+//将对应的data byte数组生成对应的 pushx; data 指令流
 // ProgramBuilder is generates bytecode to buf
 func (self *ProgramBuilder) PushBytes(data []byte) *ProgramBuilder {
 	if len(data) == 0 {
@@ -99,12 +100,14 @@ func ProgramFromPubKey(pubkey keypair.PublicKey) []byte {
 	return sink.Bytes()
 }
 
+//将公钥转化成程序序列: push 序列化公钥; CHECKSIG
 func EncodeSinglePubKeyProgramInto(sink *common.ZeroCopySink, pubkey keypair.PublicKey) {
 	builder := ProgramBuilder{sink: sink}
 
 	builder.PushPubKey(pubkey).PushOpCode(neovm.CHECKSIG)
 }
 
+//将公钥数组转化成程序序列: push m; push 序列化公钥0; ...;push 序列化公钥n; push n; CHECKMULTISIG
 func EncodeMultiPubKeyProgramInto(sink *common.ZeroCopySink, pubkeys []keypair.PublicKey, m int) error {
 	n := len(pubkeys)
 	if !(1 <= m && m <= n && n > 1 && n <= constants.MULTI_SIG_MAX_PUBKEY_SIZE) {
@@ -131,7 +134,7 @@ func ProgramFromMultiPubKey(pubkeys []keypair.PublicKey, m int) ([]byte, error) 
 	return sink.Bytes(), err
 }
 
-func ProgramFromParams(sigs [][]byte) []byte {
+func ProgramFromParams(sigs [][]byte) []byte { //因为签名是byte数组， 二这里的二维数组指的是多个签名
 	builder := NewProgramBuilder()
 	for _, sig := range sigs {
 		builder.PushBytes(sig)

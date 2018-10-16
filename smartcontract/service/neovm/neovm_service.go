@@ -177,11 +177,13 @@ func (this *NeoVmService) Invoke() (interface{}, error) {
 		//fmt.Printf("0x%02x\n", this.Engine.OpCode)
 		//makemap.Makemap()
 
-		fmt.Printf("offset: %d\t OpCode:%d\t OpName:", this.Engine.Context.GetInstructionPointer()-1, this.Engine.OpCode)
-		if this.Engine.OpCode >= vm.PUSHBYTES1 && this.Engine.OpCode <= vm.PUSHBYTES75 {
-			fmt.Printf("%s%d\n", "PUSHBYTES", this.Engine.OpCode)
-		} else {
-			fmt.Printf("%s\n", makemap.Codemap[this.Engine.OpCode])
+		if makemap.DEBUGMODE_MAP {
+			fmt.Printf("offset: %d\t OpCode:%d\t OpName:", this.Engine.Context.GetInstructionPointer()-1, this.Engine.OpCode)
+			if this.Engine.OpCode >= vm.PUSHBYTES1 && this.Engine.OpCode <= vm.PUSHBYTES75 {
+				fmt.Printf("%s%d\n", "PUSHBYTES", this.Engine.OpCode)
+			} else {
+				fmt.Printf("%s\n", makemap.Codemap[this.Engine.OpCode])
+			}
 		}
 		//debug.PrintStack()
 
@@ -271,7 +273,7 @@ func (this *NeoVmService) Invoke() (interface{}, error) {
 // SystemCall provide register service for smart contract to interaction with blockchain
 func (this *NeoVmService) SystemCall(engine *vm.ExecutionEngine) error {
 	serviceName := engine.Context.OpReader.ReadVarString(vm.MAX_BYTEARRAY_SIZE)
-	fmt.Printf("syscall service Name:%s\n", serviceName)
+	//fmt.Printf("syscall service Name:%s\n", serviceName)
 	service, ok := ServiceMap[serviceName]
 	if !ok {
 		return errors.NewErr(fmt.Sprintf("[SystemCall] service not support: %s", serviceName))

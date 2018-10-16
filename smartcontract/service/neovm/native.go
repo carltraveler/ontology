@@ -51,7 +51,7 @@ func NativeInvoke(service *NeoVmService, engine *vm.ExecutionEngine) error {
 		return fmt.Errorf("invoke native contract:%s, address invalid", address)
 	}
 	method, err := vm.PopByteArray(engine)
-	fmt.Printf("Native Inoke Metod:%s\n", method)
+	//fmt.Printf("Native Inoke Metod:%s\n", method)
 
 	if err != nil {
 		return err

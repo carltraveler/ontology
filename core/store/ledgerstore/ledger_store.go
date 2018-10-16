@@ -435,7 +435,7 @@ func (this *LedgerStoreImp) verifyHeader(header *types.Header, vbftPeerInfo map[
 			}
 		}
 		hash := header.Hash()
-		err = signature.VerifyMultiSignature(hash[:], header.Bookkeepers, m, header.SigData)
+		err = signature.VerifyMultiSignature(hash[:], header.Bookkeepers, m, header.SigData) //Block的广播会以超过m个bookkeeper也就是共识节点的签名. 只有被共识节点签名的block才会被认可
 		if err != nil {
 			log.Errorf("VerifyMultiSignature:%s,Bookkeepers:%d,pubkey:%d,heigh:%d", err, len(header.Bookkeepers), len(vbftPeerInfo), header.Height)
 			return vbftPeerInfo, err

@@ -409,14 +409,14 @@ func (e *ExecutionEngine) call(caller common.Address,
 		//method ,param bytes
 		params := make([]uint64, 2)
 
-		actIdx, err := vm.SetPointerMemory(actionName)
+		actIdx, err := vm.SetPointerMemory(actionName) //传入两个内存指针，这里是第一个，调用的方法。
 		if err != nil {
 			return nil, err
 		}
 		params[0] = uint64(actIdx)
 
 		args := input
-		argIdx, err := vm.SetPointerMemory(args)
+		argIdx, err := vm.SetPointerMemory(args) //调用方法的参数指针
 		if err != nil {
 			return nil, err
 		}
