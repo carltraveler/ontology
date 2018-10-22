@@ -223,11 +223,13 @@ func (this *NeoVmService) Invoke() (interface{}, error) {
 			if err != nil {
 				return nil, fmt.Errorf("[Appcall] read contract address error:%v", err)
 			}
+			fmt.Printf("read000 %x\n", address)
 			if bytes.Compare(address, BYTE_ZERO_20) == 0 {
 				if vm.EvaluationStackCount(this.Engine) < 1 {
 					return nil, fmt.Errorf("[Appcall] Too few input parameters:%d", vm.EvaluationStackCount(this.Engine))
 				}
 				address, err = vm.PopByteArray(this.Engine)
+				fmt.Printf("read111 %x\n", address)
 				if err != nil {
 					return nil, fmt.Errorf("[Appcall] pop contract address error:%v", err)
 				}
