@@ -221,11 +221,13 @@ func (this *NeoVmService) Invoke() (interface{}, error) {
 		case vm.APPCALL:
 			var err error
 			address := this.Engine.Context.OpReader.ReadBytes(20)
+			fmt.Printf("read000 %x\n", address)
 			if bytes.Compare(address, BYTE_ZERO_20) == 0 {
 				if vm.EvaluationStackCount(this.Engine) < 1 {
 					return nil, fmt.Errorf("[Appcall] Too few input parameters:%d", vm.EvaluationStackCount(this.Engine))
 				}
 				address, err = vm.PopByteArray(this.Engine)
+				fmt.Printf("read111 %x\n", address)
 				if err != nil {
 					return nil, fmt.Errorf("[Appcall] pop contract address error:%v", err)
 				}
@@ -273,7 +275,7 @@ func (this *NeoVmService) Invoke() (interface{}, error) {
 // SystemCall provide register service for smart contract to interaction with blockchain
 func (this *NeoVmService) SystemCall(engine *vm.ExecutionEngine) error {
 	serviceName := engine.Context.OpReader.ReadVarString(vm.MAX_BYTEARRAY_SIZE)
-	//fmt.Printf("syscall service Name:%s\n", serviceName)
+	fmt.Printf("syscall service Name:%s\n", serviceName)
 	service, ok := ServiceMap[serviceName]
 	if !ok {
 		return errors.NewErr(fmt.Sprintf("[SystemCall] service not support: %s", serviceName))

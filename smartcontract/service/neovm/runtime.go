@@ -131,7 +131,8 @@ func RuntimeLog(service *NeoVmService, engine *vm.ExecutionEngine) error {
 		fmt.Printf("Integer: %d\n", value)
 	case *vmtypes.ByteArray:
 		//stackItem = data.(*types.ByteArray)
-		fmt.Printf("string: %s\n", (item))
+		fmt.Printf("bytearray as string: %s\n", (item))
+		fmt.Printf("ByteArray as ByteArray: %x\n", (item))
 		//address, err := common.AddressParseFromBytes(item)
 		//if err != nil {
 		//	return err

@@ -23,7 +23,7 @@ import (
 	//"github.com/ontio/ontology/common"
 	"github.com/ontio/ontology/core/types"
 	. "github.com/ontio/ontology/smartcontract"
-	//"github.com/ontio/ontology/smartcontract/test/makemap"
+	"github.com/ontio/ontology/smartcontract/test/makemap"
 	"io/ioutil"
 	//"os"
 	//"strings"
@@ -37,7 +37,12 @@ func main() {
 	//codeFile := "/home/steven/github/neo-boa/test0.avm"
 	//codeFile := "/home/steven/github/neo-boa/lottery.avm"
 	//codeFile := "/home/steven/github/neo-boa/test1.avm"
-	codeFile := "/home/steven/github/neo-boa/testdata/funcall.avm"
+	//codeFile := "/home/steven/github/neo-boa/testdata/min.avm"
+	//codeFile := "/home/steven/github/neo-boa/testdata/list_global.avm"
+	//codeFile := "/home/steven/github/neo-boa/AppCallTest.avm"
+	codeFile := "/home/steven/github/neo-boa/testdata/tmp.avm"
+
+	makemap.DEBUGMODE_MAP = true
 
 	//makemap.Makemap()
 
@@ -45,7 +50,7 @@ func main() {
 	//fmt.Printf("%x", (codeStr))
 	//print("0000000000\n")
 	if err != nil {
-		fmt.Errorf("Please specify code file.")
+		fmt.Printf("Read %s Error.\n", codeFile)
 		print("xxxxxxxxxxxxxx\n")
 		//return nil
 		return
@@ -77,9 +82,9 @@ func main() {
 	}
 	//cache := storage.NewCloneCache(testBatch)
 	sc := SmartContract{
-		Config:     config,
-		Gas:        10000,
-		CloneCache: nil,
+		Config:  config,
+		Gas:     10000,
+		CacheDB: nil,
 	}
 	engine, err := sc.NewExecuteEngine(evilBytecode)
 	if err != nil {

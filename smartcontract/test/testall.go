@@ -74,9 +74,9 @@ func main() {
 		}
 
 		sc := SmartContract{
-			Config:     config,
-			Gas:        10000,
-			CloneCache: nil,
+			Config:  config,
+			Gas:     10000,
+			CacheDB: nil,
 		}
 
 		engine, err := sc.NewExecuteEngine(evilBytecode)

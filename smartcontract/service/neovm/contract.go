@@ -23,6 +23,7 @@ import (
 
 	"github.com/ontio/ontology/common"
 	"github.com/ontio/ontology/core/payload"
+	"github.com/ontio/ontology/core/states"
 	"github.com/ontio/ontology/errors"
 	vm "github.com/ontio/ontology/vm/neovm"
 )
@@ -64,14 +65,23 @@ func ContractMigrate(service *NeoVmService, engine *vm.ExecutionEngine) error {
 	service.CacheDB.DeleteContract(oldAddr)
 
 	iter := service.CacheDB.NewIterator(oldAddr[:])
+	fmt.Printf("===============befor migrate storage\n")
 	for has := iter.First(); has; has = iter.Next() {
 		key := iter.Key()
 		val := iter.Value()
 
+		value_t, err := states.GetValueFromRawStorageItem(val)
+		if err != nil {
+			fmt.Printf("err get key\n")
+		}
+
+		fmt.Printf("Storage key: %s\n", key[20:])
+		fmt.Printf("Storage val: %d\n", value_t)
 		newKey := genStorageKey(newAddr, key[20:])
 		service.CacheDB.Put(newKey, val)
 		service.CacheDB.Delete(key)
 	}
+	fmt.Printf("===============after migrate storage\n")
 	iter.Release()
 	if err := iter.Error(); err != nil {
 		return err
@@ -151,6 +161,7 @@ func isContractParamValid(engine *vm.ExecutionEngine) (*payload.DeployCode, erro
 		return nil, errors.NewErr("[Contract] Too few input parameters")
 	}
 	code, err := vm.PopByteArray(engine)
+	fmt.Printf("code:%x\n", code)
 	if err != nil {
 		return nil, err
 	}
@@ -158,10 +169,12 @@ func isContractParamValid(engine *vm.ExecutionEngine) (*payload.DeployCode, erro
 		return nil, errors.NewErr("[Contract] Code too long!")
 	}
 	needStorage, err := vm.PopBoolean(engine)
+	fmt.Println(needStorage)
 	if err != nil {
 		return nil, err
 	}
 	name, err := vm.PopByteArray(engine)
+	fmt.Printf("name:%s\n", name)
 	if err != nil {
 		return nil, err
 	}
@@ -169,6 +182,7 @@ func isContractParamValid(engine *vm.ExecutionEngine) (*payload.DeployCode, erro
 		return nil, errors.NewErr("[Contract] Name too long!")
 	}
 	version, err := vm.PopByteArray(engine)
+	fmt.Printf("version:%s\n", version)
 	if err != nil {
 		return nil, err
 	}
@@ -176,6 +190,7 @@ func isContractParamValid(engine *vm.ExecutionEngine) (*payload.DeployCode, erro
 		return nil, errors.NewErr("[Contract] Version too long!")
 	}
 	author, err := vm.PopByteArray(engine)
+	fmt.Printf("Author:%s\n", author)
 	if err != nil {
 		return nil, err
 	}
@@ -183,6 +198,7 @@ func isContractParamValid(engine *vm.ExecutionEngine) (*payload.DeployCode, erro
 		return nil, errors.NewErr("[Contract] Author too long!")
 	}
 	email, err := vm.PopByteArray(engine)
+	fmt.Printf("email:%s\n", email)
 	if err != nil {
 		return nil, err
 	}
@@ -190,6 +206,7 @@ func isContractParamValid(engine *vm.ExecutionEngine) (*payload.DeployCode, erro
 		return nil, errors.NewErr("[Contract] Email too long!")
 	}
 	desc, err := vm.PopByteArray(engine)
+	fmt.Printf("desc:%s\n", desc)
 	if err != nil {
 		return nil, err
 	}
