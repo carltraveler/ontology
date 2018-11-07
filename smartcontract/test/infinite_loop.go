@@ -40,9 +40,32 @@ func main() {
 	//codeFile := "/home/steven/github/neo-boa/testdata/min.avm"
 	//codeFile := "/home/steven/github/neo-boa/testdata/list_global.avm"
 	//codeFile := "/home/steven/github/neo-boa/AppCallTest.avm"
-	codeFile := "/home/steven/github/neo-boa/testdata/tmp.avm"
+	//codeFile := "/home/steven/github/ontology-python-compiler/testdata/tmp5.avm"
+	//codeFile := "/home/steven/github/ontology-python-compiler/testdata/tmp5.avmt"
+	//codeFile := "/home/steven/github/ontology-python-compiler/testdata/tmp1.avmt"
+	//codeFile := "/home/steven/github/ontology-python-compiler/testdata/tmp1.avmt"
+	//codeFile := "/home/steven/github/ontology-python-compiler/testdata/WhileTest2.avm"
+	//codeFile := "/home/steven/github/ontology-python-compiler/testdata/test_while.avm"
+	//codeFile := "/home/steven/github/ontology-python-compiler/testdata/test_while1.avmt"
+	//codeFile := "/home/steven/github/ontology-python-compiler/testdata/test_for.avmt"
+	//codeFile := "/home/steven/github/ontology-python-compiler/testdata/IterTest6.avmt"
+	//codeFile := "/home/steven/github/ontology-python-compiler/testdata/test_call_and_if.avmt"
+	//codeFile := "/home/steven/github/ontology-python-compiler/testdata/test_while1.avmt"
+	//codeFile := "/home/steven/github/ontology-python-compiler/testdata/funcall.avmt"
+	//codeFile := "/home/steven/github/ontology-python-compiler/testdata/tmp6.avmt"
+	//codeFile := "/home/steven/github/ontology-python-compiler/testdata/test_slice.avmt"
+	//codeFile := "/home/steven/github/ontology-python-compiler/testdata/test_state.avmt"
+	//codeFile := "/home/steven/github/ontology-python-compiler/testdata/test/test_global.avm"
+	//codeFile := "/home/steven/github/neo-boa/testdata/test_boolop.avm"
+	//codeFile := "/home/steven/github/ontology-python-compiler/testdata/test/NotEqualTest.avm"
+	//codeFile := "/home/steven/github/ontology-python-compiler/testdata/test/test_dict1.avm"
+	//codeFile := "/home/steven/github/ontology-python-compiler/testdata/test/test_Fibonacci.avm"
+	//codeFile := "/home/steven/github/ontology-python-compiler/testdata/test/test_boolop.avm"
+	//codeFile := "/home/steven/github/neo-boa/testdata/testxx.avm"
+	codeFile := "/home/steven/github/ontology-python-compiler/testdata/listremove.avm"
 
-	makemap.DEBUGMODE_MAP = true
+	//makemap.DEBUGMODE_MAP = true
+	makemap.DEBUGMODE_MAP = false
 
 	//makemap.Makemap()
 
@@ -83,7 +106,7 @@ func main() {
 	//cache := storage.NewCloneCache(testBatch)
 	sc := SmartContract{
 		Config:  config,
-		Gas:     10000,
+		Gas:     100000000,
 		CacheDB: nil,
 	}
 	engine, err := sc.NewExecuteEngine(evilBytecode)
