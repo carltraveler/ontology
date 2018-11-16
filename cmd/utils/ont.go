@@ -286,7 +286,7 @@ func TransferFromTx(gasPrice, gasLimit uint64, asset, sender, from, to string, a
 
 //NewInvokeTransaction return smart contract invoke transaction
 func NewInvokeTransaction(gasPrice, gasLimit uint64, invokeCode []byte) *types.MutableTransaction {
-	invokePayload := &payload.InvokeCode{
+	invokePayload := &payload.InvokeCode{ //这里决定了是Invoke type
 		Code: invokeCode,
 	}
 	tx := &types.MutableTransaction{
@@ -305,7 +305,7 @@ func SignTransaction(signer *account.Account, tx *types.MutableTransaction) erro
 		tx.Payer = signer.Address
 	}
 	txHash := tx.Hash()
-	sigData, err := Sign(txHash.ToArray(), signer)
+	sigData, err := Sign(txHash.ToArray(), signer) //是txhash用私钥加密的数据就是签名的数据
 	if err != nil {
 		return fmt.Errorf("sign error:%s", err)
 	}

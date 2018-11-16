@@ -71,7 +71,7 @@ func setupAPP() *cli.App {
 	app.Commands = []cli.Command{
 		cmd.AccountCommand, //设置命令
 		cmd.InfoCommand,
-		cmd.AssetCommand,
+		cmd.AssetCommand, //查询资产
 		cmd.ContractCommand,
 		cmd.ImportCommand,
 		cmd.ExportCommand,

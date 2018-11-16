@@ -62,7 +62,7 @@ func main() {
 	//codeFile := "/home/steven/github/ontology-python-compiler/testdata/test/test_Fibonacci.avm"
 	//codeFile := "/home/steven/github/ontology-python-compiler/testdata/test/test_boolop.avm"
 	//codeFile := "/home/steven/github/neo-boa/testdata/testxx.avm"
-	codeFile := "/home/steven/github/ontology-python-compiler/testdata/listremove.avm"
+	codeFile := "/home/steven/github/ontology-python-compiler/testdata/str2int.avm"
 
 	//makemap.DEBUGMODE_MAP = true
 	makemap.DEBUGMODE_MAP = false
