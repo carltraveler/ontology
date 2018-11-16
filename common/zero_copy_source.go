@@ -161,12 +161,13 @@ func (self *ZeroCopySource) NextInt16() (data int16, eof bool) {
 	return int16(val), eof
 }
 
+//获取目标[]byte,其长度已序列化
 func (self *ZeroCopySource) NextVarBytes() (data []byte, size uint64, irregular bool, eof bool) {
 	var count uint64
-	count, size, irregular, eof = self.NextVarUint()
+	count, size, irregular, eof = self.NextVarUint() //获取Bytes的count数目.序列化方法
 	size += count
 
-	data, eof = self.NextBytes(count)
+	data, eof = self.NextBytes(count) //获取目标[]byte
 
 	return
 }

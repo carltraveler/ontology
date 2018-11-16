@@ -158,7 +158,7 @@ func (this *NeoVmService) Invoke() (interface{}, error) {
 				return nil, ERR_CHECK_STACK_SIZE
 			}
 		}
-		if this.Engine.OpCode >= vm.PUSHBYTES1 && this.Engine.OpCode <= vm.PUSHBYTES75 {
+		if this.Engine.OpCode >= vm.PUSHBYTES1 && this.Engine.OpCode <= vm.PUSHBYTES75 { //在这里扣除非哦那个
 			if !this.ContextRef.CheckUseGas(OPCODE_GAS) {
 				return nil, ERR_GAS_INSUFFICIENT
 			}
