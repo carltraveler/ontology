@@ -467,6 +467,20 @@ func validatePickItem(e *ExecutionEngine) error {
 		if v := item.(*types.Map).TryGetValue(key); v == nil {
 			return errors.ERR_MAP_NOT_EXIST
 		}
+	case *types.ByteArray:
+		index, err := PeekBigInteger(e)
+		if err != nil {
+			return err
+		}
+		if index.Sign() < 0 {
+			return errors.ERR_BAD_VALUE
+		}
+		barr ,err := item.GetByteArray()
+		if index.Cmp(big.NewInt(int64(len(barr)))) >= 0 {
+			return errors.ERR_OVER_MAX_ARRAY_SIZE
+		}
+
+
 	default:
 		return fmt.Errorf("validatePickItem error: %s", errors.ERR_NOT_SUPPORT_TYPE)
 	}
@@ -511,6 +525,19 @@ func validatorSetItem(e *ExecutionEngine) error {
 		if !key.IsMapKey() {
 			return errors.ERR_NOT_MAP_KEY
 		}
+	case *types.ByteArray:
+		index, err := PeekNBigInt(1, e)
+		if err != nil {
+			return err
+		}
+		if index.Sign() < 0 {
+			return errors.ERR_BAD_VALUE
+		}
+		barr ,err := item.GetByteArray()
+		if index.Cmp(big.NewInt(int64(len(barr)))) >= 0 {
+			return errors.ERR_OVER_MAX_ARRAY_SIZE
+		}
+
 	default:
 		return fmt.Errorf("validatePickItem error: %s", errors.ERR_NOT_SUPPORT_TYPE)
 	}
@@ -626,6 +653,70 @@ func LogStackTrace(e *ExecutionEngine, needStackCount int, desc string) error {
 	stackCount := EvaluationStackCount(e)
 	if stackCount < needStackCount {
 		return errors.ERR_UNDER_STACK_LEN
+	}
+	return nil
+}
+
+
+func validatorHasKey(e *ExecutionEngine) error{
+	if err := LogStackTrace(e, 2, "[validatorHasKey]"); err != nil {
+		return err
+	}
+	key := PeekNStackItem(0, e)
+	arrItem := PeekNStackItem(1, e)
+	_, ok1 := arrItem.(*types.Array)
+	_, ok2 := arrItem.(*types.Map)
+	if !ok1 && !ok2 {
+		return fmt.Errorf("validatorHasKey error: %s", errors.ERR_NOT_SUPPORT_TYPE)
+	}
+
+	if ok2{
+		_,err := key.GetBigInteger()
+		if err != nil{
+			return fmt.Errorf("validatorHasKey error: %s", errors.ERR_HASKEY_NOT_SUPPORT)
+		}
+	}
+
+	return nil
+}
+
+func validatorKeys(e *ExecutionEngine) error{
+	if err := LogStackTrace(e, 2, "[validatorKeys]"); err != nil {
+		return err
+	}
+	arrItem := PeekNStackItem(0, e)
+	_, ok1 := arrItem.(*types.Array)
+	_, ok2 := arrItem.(*types.Map)
+	if !ok1 && !ok2 {
+		return fmt.Errorf("validatorKeys error: %s", errors.ERR_NOT_SUPPORT_TYPE)
+	}
+	return nil
+}
+
+func validatorValues(e *ExecutionEngine) error{
+	if err := LogStackTrace(e, 2, "[validatorValues]"); err != nil {
+		return err
+	}
+	arrItem := PeekNStackItem(0, e)
+	_, ok1 := arrItem.(*types.Array)
+	_, ok2 := arrItem.(*types.Map)
+	if !ok1 && !ok2 {
+		return fmt.Errorf("validatorValues error: %s", errors.ERR_NOT_SUPPORT_TYPE)
+	}
+	return nil
+}
+
+func validateDJMP(e *ExecutionEngine) error{
+	dest, err := PeekBigInteger(e)
+	if err != nil{
+		return fmt.Errorf("validateDJMP error: %s", errors.ERR_NOT_SUPPORT_TYPE)
+	}
+	offset := dest.Int64()
+
+	offset = int64(e.Context.GetInstructionPointer()) + offset - 3
+
+	if offset < 0 || int(offset) > len(e.Context.Code) {
+		return fmt.Errorf("validateDJMP error: %s", errors.ERR_DJMP_OFFSET_ERROR)
 	}
 	return nil
 }

@@ -21,6 +21,7 @@ package neovm
 import (
 	"math/big"
 
+	"github.com/ontio/ontology/errors"
 	"github.com/ontio/ontology/vm/neovm/types"
 )
 
@@ -86,6 +87,11 @@ func opPickItem(e *ExecutionEngine) (VMState, error) { // args stack bottom {ite
 		PushData(e, s[i])
 	case *types.Map:
 		PushData(e, items.(*types.Map).TryGetValue(index))
+	case *types.ByteArray:
+		bi, _ := index.GetBigInteger()
+		i := int(bi.Int64())
+		a, _ := items.GetByteArray()
+		PushData(e, a[i])
 	}
 
 	return NONE, nil
@@ -117,7 +123,22 @@ func opSetItem(e *ExecutionEngine) (VMState, error) {
 		items, _ := item.GetStruct()
 		bi, _ := index.GetBigInteger()
 		i := int(bi.Int64())
-		items[i] = newItem //why here not push back to the stack. however the itm pop out of stack.
+		items[i] = newItem
+	case *types.ByteArray:
+		items, _ := item.GetByteArray()
+		bi, _ := index.GetBigInteger()
+		i := int(bi.Int64())
+
+		value, err := item.GetBigInteger()
+		if err != nil {
+			return FAULT, errors.NewErr("Not a byte in SetItem")
+		}
+
+		b := int(value.Int64())
+		if b < 0 || b > 255 {
+			return FAULT, errors.NewErr("Not a byte in SetItem")
+		}
+		items[i] = byte(b)
 	}
 
 	return NONE, nil
@@ -180,5 +201,92 @@ func opRemove(e *ExecutionEngine) (VMState, error) { // this is only for map. bo
 	item := PopStackItem(e)
 	m := item.(*types.Map)
 	m.Remove(index)
+	return NONE, nil
+}
+
+func opHasKey(e *ExecutionEngine) (VMState, error) {
+	key := PopStackItem(e)
+	item := PopStackItem(e)
+
+	switch item.(type) {
+	case *types.Array:
+		//idx is not int ,return Fault
+		idx, err := key.GetBigInteger()
+		if err != nil {
+			return FAULT, err
+		}
+		//idx is < 0 , return Fault
+		if int(idx.Int64()) < 0 {
+			return FAULT, err
+		}
+
+		//item is not array ,return Fault
+		arr, err := item.GetArray()
+		if err != nil {
+			return FAULT, err
+		}
+
+		PushData(e, len(arr) > int(idx.Int64()))
+		return NONE, nil
+
+	case *types.Map:
+		mapitem, err := item.GetMap()
+		if err != nil {
+			return FAULT, err
+		}
+		_, ok := mapitem[key]
+		PushData(e, ok)
+		return NONE, nil
+	}
+	return FAULT, errors.NewErr("Not a supported type")
+}
+
+func opKeys(e *ExecutionEngine) (VMState, error) {
+	item := PopStackItem(e)
+	switch item.(type) {
+	case *types.Array:
+		arr, err := item.GetArray()
+		if err != nil {
+			return FAULT, err
+		}
+		keys := make([]types.StackItems, len(arr))
+		for i := range arr {
+			keys = append(keys, types.NewInteger(big.NewInt(int64(i))))
+		}
+		PushData(e, types.NewArray(keys))
+	case *types.Map:
+		mapitem, err := item.GetMap()
+		if err != nil {
+			return FAULT, err
+		}
+		keys := make([]types.StackItems, len(mapitem))
+		for k := range mapitem {
+			keys = append(keys, k)
+		}
+		PushData(e, types.NewArray(keys))
+	default:
+		return FAULT, errors.NewErr("Not a supported type")
+	}
+	return NONE, nil
+}
+
+func opValues(e *ExecutionEngine) (VMState, error) {
+	item := PopStackItem(e)
+	switch item.(type) {
+	case *types.Array:
+		PushData(e, item)
+	case *types.Map:
+		mapitem, err := item.GetMap()
+		if err != nil {
+			return FAULT, err
+		}
+		values := make([]types.StackItems, len(mapitem))
+		for _, v := range mapitem {
+			values = append(values, v)
+		}
+		PushData(e, types.NewArray(values))
+	default:
+		return FAULT, errors.NewErr("Not a supported type")
+	}
 	return NONE, nil
 }
