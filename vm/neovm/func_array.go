@@ -199,8 +199,26 @@ func opReverse(e *ExecutionEngine) (VMState, error) { //reverse the array. this 
 func opRemove(e *ExecutionEngine) (VMState, error) { // this is only for map. bottom { map, index } top ==> remove the map of index element.
 	index := PopStackItem(e)
 	item := PopStackItem(e)
-	m := item.(*types.Map)
-	m.Remove(index)
+
+	switch item.(type) {
+	case *types.Map:
+		m := item.(*types.Map)
+		m.Remove(index)
+	case *types.Array:
+		m, err := item.GetArray()
+		if err != nil {
+			return FAULT, errors.NewErr("[opRemove]get Array error!")
+		}
+		atidx := 0
+		for i, obj := range m {
+			if index.Equals(obj) {
+				atidx = i
+				break
+			}
+		}
+		item.(*types.Array).RemoveAt(atidx)
+	}
+
 	return NONE, nil
 }
 

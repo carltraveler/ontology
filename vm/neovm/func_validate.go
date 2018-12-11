@@ -475,11 +475,10 @@ func validatePickItem(e *ExecutionEngine) error {
 		if index.Sign() < 0 {
 			return errors.ERR_BAD_VALUE
 		}
-		barr ,err := item.GetByteArray()
+		barr, err := item.GetByteArray()
 		if index.Cmp(big.NewInt(int64(len(barr)))) >= 0 {
 			return errors.ERR_OVER_MAX_ARRAY_SIZE
 		}
-
 
 	default:
 		return fmt.Errorf("validatePickItem error: %s", errors.ERR_NOT_SUPPORT_TYPE)
@@ -533,7 +532,7 @@ func validatorSetItem(e *ExecutionEngine) error {
 		if index.Sign() < 0 {
 			return errors.ERR_BAD_VALUE
 		}
-		barr ,err := item.GetByteArray()
+		barr, err := item.GetByteArray()
 		if index.Cmp(big.NewInt(int64(len(barr)))) >= 0 {
 			return errors.ERR_OVER_MAX_ARRAY_SIZE
 		}
@@ -616,19 +615,24 @@ func validatorRemove(e *ExecutionEngine) error {
 		return errors.ERR_BAD_VALUE
 	}
 
-	if !value.IsMapKey() {
-		return errors.ERR_NOT_MAP_KEY
-	}
-
 	item := PeekNStackItem(1, e)
 	if item == nil {
 		return errors.ERR_BAD_VALUE
 	}
 
-	if _, ok := item.(*types.Map); !ok {
-		return errors.ERR_REMOVE_NOT_SUPPORT
+	switch item.(type) {
+	case *types.Map:
+		if !value.IsMapKey() {
+			return errors.ERR_NOT_MAP_KEY
+		}
+		if _, ok := item.(*types.Map); !ok {
+			return errors.ERR_REMOVE_NOT_SUPPORT
+		}
+	case *types.Array:
+		if _, ok := item.(*types.Array); !ok {
+			return errors.ERR_REMOVE_NOT_SUPPORT
+		}
 	}
-
 	return nil
 }
 
@@ -657,8 +661,7 @@ func LogStackTrace(e *ExecutionEngine, needStackCount int, desc string) error {
 	return nil
 }
 
-
-func validatorHasKey(e *ExecutionEngine) error{
+func validatorHasKey(e *ExecutionEngine) error {
 	if err := LogStackTrace(e, 2, "[validatorHasKey]"); err != nil {
 		return err
 	}
@@ -670,9 +673,9 @@ func validatorHasKey(e *ExecutionEngine) error{
 		return fmt.Errorf("validatorHasKey error: %s", errors.ERR_NOT_SUPPORT_TYPE)
 	}
 
-	if ok2{
-		_,err := key.GetBigInteger()
-		if err != nil{
+	if ok2 {
+		_, err := key.GetBigInteger()
+		if err != nil {
 			return fmt.Errorf("validatorHasKey error: %s", errors.ERR_HASKEY_NOT_SUPPORT)
 		}
 	}
@@ -680,7 +683,7 @@ func validatorHasKey(e *ExecutionEngine) error{
 	return nil
 }
 
-func validatorKeys(e *ExecutionEngine) error{
+func validatorKeys(e *ExecutionEngine) error {
 	if err := LogStackTrace(e, 2, "[validatorKeys]"); err != nil {
 		return err
 	}
@@ -693,7 +696,7 @@ func validatorKeys(e *ExecutionEngine) error{
 	return nil
 }
 
-func validatorValues(e *ExecutionEngine) error{
+func validatorValues(e *ExecutionEngine) error {
 	if err := LogStackTrace(e, 2, "[validatorValues]"); err != nil {
 		return err
 	}
@@ -706,9 +709,9 @@ func validatorValues(e *ExecutionEngine) error{
 	return nil
 }
 
-func validateDJMP(e *ExecutionEngine) error{
+func validateDJMP(e *ExecutionEngine) error {
 	dest, err := PeekBigInteger(e)
-	if err != nil{
+	if err != nil {
 		return fmt.Errorf("validateDJMP error: %s", errors.ERR_NOT_SUPPORT_TYPE)
 	}
 	offset := dest.Int64()

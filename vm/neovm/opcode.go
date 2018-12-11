@@ -65,20 +65,20 @@ const (
 	FROMALTSTACK    OpCode = 0x6C // Puts the input onto the top of the main stack. Removes it from the alt stack.
 	XDROP           OpCode = 0x6D
 
-	DJMP            OpCode = 0x6E // Long jump
+	DJMP OpCode = 0x6E // Long jump
 
-	XSWAP           OpCode = 0x72
-	XTUCK           OpCode = 0x73
-	DEPTH           OpCode = 0x74 // Puts the number of stack items onto the stack.
-	DROP            OpCode = 0x75 // Removes the top stack item.
-	DUP             OpCode = 0x76 // Duplicates the top stack item.
-	NIP             OpCode = 0x77 // Removes the second top stack item.
-	OVER            OpCode = 0x78 // Copies the second top stack item to the top.
-	PICK            OpCode = 0x79 // The item n back in the stack is copied to the top.
-	ROLL            OpCode = 0x7A // The item n back in the stack is moved to the top.
-	ROT             OpCode = 0x7B // Move third top item on the top of stack.
-	SWAP            OpCode = 0x7C // The top two items on the stack are swapped.
-	TUCK            OpCode = 0x7D // The item at the top of the stack is copied and inserted before the second-to-top item.
+	XSWAP OpCode = 0x72
+	XTUCK OpCode = 0x73
+	DEPTH OpCode = 0x74 // Puts the number of stack items onto the stack.
+	DROP  OpCode = 0x75 // Removes the top stack item.
+	DUP   OpCode = 0x76 // Duplicates the top stack item.
+	NIP   OpCode = 0x77 // Removes the second top stack item.
+	OVER  OpCode = 0x78 // Copies the second top stack item to the top.
+	PICK  OpCode = 0x79 // The item n back in the stack is copied to the top.
+	ROLL  OpCode = 0x7A // The item n back in the stack is moved to the top.
+	ROT   OpCode = 0x7B // Move third top item on the top of stack.
+	SWAP  OpCode = 0x7C // The top two items on the stack are swapped.
+	TUCK  OpCode = 0x7D // The item at the top of the stack is copied and inserted before the second-to-top item.
 
 	// Splice
 	CAT    OpCode = 0x7E // Concatenates two strings.

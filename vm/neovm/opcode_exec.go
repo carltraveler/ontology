@@ -62,7 +62,7 @@ var (
 		APPCALL:  {Opcode: APPCALL, Name: "APPCALL"}, // APPCALL AND SYSCALL will exec as NATIVE service. the service is not define by user. but the system stack bottom
 		//TAILCALL: {Opcode: TAILCALL, Name: "TAILCALL", Exec: opAppCall},
 		SYSCALL: {Opcode: SYSCALL, Name: "SYSCALL"},
-		DJMP:     {Opcode:DJMP, Name: "DJMP", Exec:opDJMP, Validator:validateDJMP},
+		DJMP:    {Opcode: DJMP, Name: "DJMP", Exec: opDJMP, Validator: validateDJMP},
 
 		//Stack ops
 		DUPFROMALTSTACK: {Opcode: DUPFROMALTSTACK, Name: "DUPFROMALTSTACK", Exec: opToDupFromAltStack, Validator: validateAltStackCount1},
