@@ -61,8 +61,15 @@ func main() {
 	//codeFile := "/home/steven/github/ontology-python-compiler/testdata/test/test_dict1.avm"
 	//codeFile := "/home/steven/github/ontology-python-compiler/testdata/test/test_Fibonacci.avm"
 	//codeFile := "/home/steven/github/ontology-python-compiler/testdata/test/test_boolop.avm"
-	//codeFile := "/home/steven/github/neo-boa/testdata/testxx.avm"
-	codeFile := "/home/steven/github/ontology-python-compiler/testdata/str2int.avm"
+	//codeFile := "/home/cl/github/neo-boa/testdata/test_int.avm"
+	//codeFile := "/home/cl/github/ontology-python-compiler/testdata/test_int.avm"
+	//codeFile := "/home/cl/github/ontology-python-compiler/testdata/str2int.avm"
+	//codeFile := "/home/cl/github/ontology-python-compiler/testdata/test_lil.avm"
+	//codeFile := "/home/cl/github/ontology-python-compiler/testdata/test_str.avm"
+	//codeFile := "/home/cl/github/ontology-python-compiler/testdata/test_op0.avm"
+	//codeFile := "/home/cl/github/ontology-python-compiler/testdata/test_div.avm"
+	codeFile := "/home/cl/github/ontology-python-compiler/testdata/test_xtuct.avm"
+	//codeFile := "/home/cl/github/neo-boa/testdata/test_op.avm"
 
 	//makemap.DEBUGMODE_MAP = true
 	makemap.DEBUGMODE_MAP = false

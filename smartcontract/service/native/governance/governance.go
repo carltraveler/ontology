@@ -172,6 +172,7 @@ func InitConfig(native *native.NativeService) ([]byte, error) {
 	}
 
 	//check the configuration
+	//vbft的配置参数之间存在制约关系。
 	err = CheckVBFTConfig(configuration)
 	if err != nil {
 		return utils.BYTE_FALSE, fmt.Errorf("checkVBFTConfig failed: %v", err)

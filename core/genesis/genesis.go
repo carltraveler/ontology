@@ -69,20 +69,24 @@ func BuildGenesisBlock(defaultBookkeeper []keypair.PublicKey, genesisConfig *con
 	}
 	conf := bytes.NewBuffer(nil)
 	if genesisConfig.VBFT != nil {
+		//序列化vbft config.供治理合约初始化使用
 		genesisConfig.VBFT.Serialize(conf)
 	}
+	//传入vbft的全局配置，如共识节点的地址，写入的共识合约的账本空间，由于所有的落账都需要通过tx事务来运行，所以这里要构造初始化治理合约账本空间，将vbft写入，需要构造tx。疑问是，gas由谁来付
+	//构造创世区块包含的交易.
 	govConfig := newGoverConfigInit(conf.Bytes())
-	consensusPayload, err := vconfig.GenesisConsensusPayload(govConfig.Hash(), 0)
+	//consensusPayload是VbftBlockInfo的json序列化数据
+	consensusPayload, err := vconfig.GenesisConsensusPayload(govConfig.Hash(), 0) //第三个参数是blockheight，可知，第一个tx所在的block永远是初始化治理合约账本空间.并在该账本空间中存入vbft config序列化数据.
 	if err != nil {
 		return nil, fmt.Errorf("consensus genesus init failed: %s", err)
 	}
-	//blockdata
+	//blockdata, 构造创始区块头部
 	genesisHeader := &types.Header{
 		Version:          BlockVersion,
 		PrevBlockHash:    common.Uint256{},
 		TransactionsRoot: common.Uint256{},
 		Timestamp:        constants.GENESIS_BLOCK_TIMESTAMP,
-		Height:           uint32(0),
+		Height:           uint32(0), //创世区块的高度永远是0
 		ConsensusData:    GenesisNonce,
 		NextBookkeeper:   nextBookkeeper,
 		ConsensusPayload: consensusPayload,
@@ -91,27 +95,27 @@ func BuildGenesisBlock(defaultBookkeeper []keypair.PublicKey, genesisConfig *con
 		SigData:     nil,
 	}
 
-	//block
-	ont := newGoverningToken()
+	//block. 创始区块交易
+	ont := newGoverningToken() //只是将ont native合约的地址作为paload code 部署到链上去.打包成deploy Transaction
 	ong := newUtilityToken()
 	param := newParamContract()
 	oid := deployOntIDContract()
 	auth := deployAuthContract()
-	config := newConfig()
+	config := newConfig() //治理合约地址
 
 	genesisBlock := &types.Block{
-		Header: genesisHeader,
-		Transactions: []*types.Transaction{
+		Header: genesisHeader, //创始区块头部
+		Transactions: []*types.Transaction{ //创始区块包含的交易。
 			ont,
 			ong,
 			param,
 			oid,
 			auth,
 			config,
-			newGoverningInit(),
-			newUtilityInit(),
-			newParamInit(),
-			govConfig,
+			newGoverningInit(), //ont init tx. 参数是Bookkeeper多签地址，和ont总发行量
+			newUtilityInit(),   //ong init tx. 无参数
+			newParamInit(),     //param init tx， 参数:Bookkeeper多签地址
+			govConfig,          //构造调用治理合约init方法的事务交易,将vbft共识配置，共识节点地址序列化的数据落入治理合约账本空间，上链
 		},
 	}
 	genesisBlock.RebuildMerkleRoot()
@@ -265,6 +269,7 @@ func newParamInit() *types.Transaction {
 	return tx
 }
 
+//由于所有的存储
 func newGoverConfigInit(config []byte) *types.Transaction {
 	mutable := utils.BuildNativeTransaction(nutils.GovernanceContractAddress, governance.INIT_CONFIG, config)
 	tx, err := mutable.IntoImmutable()

@@ -62,6 +62,7 @@ func NewInvokeTransaction(code []byte) *types.MutableTransaction {
 	}
 }
 
+//生成调用native的avm.放在tx的负载中
 func BuildNativeTransaction(addr common.Address, initMethod string, args []byte) *types.MutableTransaction {
 	bf := new(bytes.Buffer)
 	builder := vm.NewParamsBuilder(bf)

@@ -33,13 +33,13 @@ import (
 type Header struct {
 	Version          uint32
 	PrevBlockHash    common.Uint256
-	TransactionsRoot common.Uint256
+	TransactionsRoot common.Uint256 //MerkleRoot
 	BlockRoot        common.Uint256
 	Timestamp        uint32
 	Height           uint32
 	ConsensusData    uint64
 	ConsensusPayload []byte
-	NextBookkeeper   common.Address
+	NextBookkeeper   common.Address //Bookkeepers的多签地址
 
 	//Program *program.Program
 	Bookkeepers []keypair.PublicKey

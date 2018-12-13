@@ -131,6 +131,6 @@ func (b *Block) RebuildMerkleRoot() {
 	for _, tx := range txs {
 		hashes = append(hashes, tx.Hash())
 	}
-	hash := common.ComputeMerkleRoot(hashes)
+	hash := common.ComputeMerkleRoot(hashes) //hashes数组保存了Block中，每个tx的hash
 	b.Header.TransactionsRoot = hash
 }
