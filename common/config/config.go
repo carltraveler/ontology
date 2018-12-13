@@ -203,7 +203,8 @@ var MainNetConfig = &GenesisConfig{
 		VrfProof:             "c57741f934042cb8d8b087b44b161db56fc3ffd4ffb675d36cd09f83935be853d8729f3f5298d12d6fd28d45dde515a4b9d7f67682d182ba5118abf451ff1988",
 		Peers: []*VBFTPeerStakeInfo{
 			{
-				Index:      1,
+				Index: 1,
+				//这里的公钥是经过序列化后的公钥.所以真正的公钥需要经过反序列化
 				PeerPubkey: "03348c8fe64e1defb408676b6e320038bd2e592c802e27c3d7e88e68270076c2f7",
 				Address:    "AZavFr7sQ4em2NmqWDjLMY34tHMQzATWgx",
 			},
@@ -589,6 +590,7 @@ func NewOntologyConfig() *OntologyConfig {
 	}
 }
 
+//vbft config中保存的公钥是经过序列化后的公钥，这里是解码成共识节点真正的公钥
 func (this *OntologyConfig) GetBookkeepers() ([]keypair.PublicKey, error) {
 	var bookKeepers []string
 	switch this.Genesis.ConsensusType {

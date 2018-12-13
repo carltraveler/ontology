@@ -22,6 +22,7 @@ import (
 )
 
 // param hashes will be used as workspace
+//类似md5的作用?
 func ComputeMerkleRoot(hashes []Uint256) Uint256 {
 	if len(hashes) == 0 {
 		return Uint256{}

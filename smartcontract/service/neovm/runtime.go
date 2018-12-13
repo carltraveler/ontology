@@ -128,11 +128,13 @@ func RuntimeLog(service *NeoVmService, engine *vm.ExecutionEngine) error {
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Integer: %d\n", value)
+		fmt.Printf("10 Integer: %d\n", value)
+		fmt.Printf("16 Integer: %x\n", value)
 	case *vmtypes.ByteArray:
 		//stackItem = data.(*types.ByteArray)
 		fmt.Printf("bytearray as string: %s\n", (item))
-		fmt.Printf("ByteArray as ByteArray: %x\n", (item))
+		fmt.Printf("ByteArray as 16 integer: %x\n", (item))
+		fmt.Printf("ByteArray as vector: %v\n", (item))
 		//address, err := common.AddressParseFromBytes(item)
 		//if err != nil {
 		//	return err

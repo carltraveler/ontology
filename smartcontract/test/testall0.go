@@ -43,8 +43,8 @@ func pathExists(path string) (bool, error) {
 
 func main() {
 	makemap.DEBUGMODE_MAP = false
-	testdir := "/home/steven/github/ontology-python-compiler/testdata/test/"
-	codeFile := [...]string{"funcall", "IterTest5", "IterTest6", "test_append_remove", "test_boolop", "test_call_and_if", "test_compare", "test_dict0", "test_dict1", "test_dict_com0", "test_dict_com1", "test_dict_com2", "test_dict", "test_equal_not", "test_Fibonacci", "test_global", "test_list_com", "test_slice", "test_state", "test_while1", "test_while2", "test_while", "ifexpr", "test_for", "BinopTest", "test_elt_in", "isnot", "test_reverse_reversed", "str2int"}
+	testdir := "/home/cl/github/ontology-python-compiler/testdata/test/"
+	codeFile := [...]string{"funcall", "IterTest5", "IterTest6", "test_append_remove", "test_boolop", "test_call_and_if", "test_compare", "test_dict0", "test_dict1", "test_dict_com0", "test_dict_com1", "test_dict_com2", "test_dict", "test_equal_not", "test_Fibonacci", "test_global", "test_list_com", "test_slice", "test_state", "test_while1", "test_while2", "test_while", "ifexpr", "test_for", "BinopTest", "test_elt_in", "isnot", "test_reverse_reversed", "str2int", "test_split", "test_hex2byte_and_bytereverse", "str2int", "test_lil", "test_bytes2str", "test_div", "test_str"}
 	extendname := ".avm"
 
 	for i := 0; i < len(codeFile); i++ {

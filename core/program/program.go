@@ -108,6 +108,8 @@ func EncodeSinglePubKeyProgramInto(sink *common.ZeroCopySink, pubkey keypair.Pub
 }
 
 //将公钥数组转化成程序序列: push m; push 序列化公钥0; ...;push 序列化公钥n; push n; CHECKMULTISIG
+//n是公钥数组的长度
+//m是至少需要的签名个数？待验证。
 func EncodeMultiPubKeyProgramInto(sink *common.ZeroCopySink, pubkeys []keypair.PublicKey, m int) error {
 	n := len(pubkeys)
 	if !(1 <= m && m <= n && n > 1 && n <= constants.MULTI_SIG_MAX_PUBKEY_SIZE) {

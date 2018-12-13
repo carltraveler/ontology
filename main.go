@@ -219,6 +219,7 @@ func initLog(ctx *cli.Context) {
 	log.InitLog(logLevel, log.PATH, log.Stdout)
 }
 
+//主要是设置OntologyConfig参数，其实最重要的是vbft和p2p
 func initConfig(ctx *cli.Context) (*config.OntologyConfig, error) {
 	//init ontology config from cli
 	cfg, err := cmd.SetOntologyConfig(ctx)
@@ -260,16 +261,20 @@ func initLedger(ctx *cli.Context) (*ledger.Ledger, error) {
 	events.Init() //Init event hub
 
 	var err error
+	//账本目录
 	dbDir := utils.GetStoreDirPath(config.DefConfig.Common.DataDir, config.DefConfig.P2PNode.NetworkName)
 	ledger.DefLedger, err = ledger.NewLedger(dbDir)
 	if err != nil {
 		return nil, fmt.Errorf("NewLedger error:%s", err)
 	}
+	//获取公式节点公钥数组
 	bookKeepers, err := config.DefConfig.GetBookkeepers()
 	if err != nil {
 		return nil, fmt.Errorf("GetBookkeepers error:%s", err)
 	}
+	//主要是共识配置
 	genesisConfig := config.DefConfig.Genesis
+	//构造创世区块.
 	genesisBlock, err := genesis.BuildGenesisBlock(bookKeepers, genesisConfig)
 	if err != nil {
 		return nil, fmt.Errorf("genesisBlock error %s", err)
