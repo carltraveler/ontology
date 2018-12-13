@@ -81,13 +81,13 @@ func opDJMP(e *ExecutionEngine) (VMState, error) {
 	}
 	offset := dest.Int64()
 
-	offset = int64(e.Context.GetInstructionPointer()) + offset - 3
+	//offset = int64(e.Context.GetInstructionPointer()) + offset - 3
 
 	if offset < 0 || int(offset) > len(e.Context.Code) {
 		return FAULT, errors.ERR_FAULT
 	}
 
-	e.Context.SetInstructionPointer(int64(offset))
+	e.Context.SetInstructionPointer(offset)
 
 	return NONE, nil
 }

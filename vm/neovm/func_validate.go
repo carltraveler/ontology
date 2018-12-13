@@ -716,8 +716,6 @@ func validateDJMP(e *ExecutionEngine) error {
 	}
 	offset := dest.Int64()
 
-	offset = int64(e.Context.GetInstructionPointer()) + offset - 3
-
 	if offset < 0 || int(offset) > len(e.Context.Code) {
 		return fmt.Errorf("validateDJMP error: %s", errors.ERR_DJMP_OFFSET_ERROR)
 	}
