@@ -72,7 +72,7 @@ func opRet(e *ExecutionEngine) (VMState, error) {
 
 func opDJMP(e *ExecutionEngine) (VMState, error) {
 	context := e.Context.Clone()
-	e.Context.SetInstructionPointer(int64(e.Context.GetInstructionPointer() + 2))
+	e.Context.SetInstructionPointer(int64(e.Context.GetInstructionPointer()))
 	e.PushContext(context)
 
 	dest, err := PopBigInt(e)

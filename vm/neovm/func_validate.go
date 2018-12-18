@@ -684,7 +684,7 @@ func validatorHasKey(e *ExecutionEngine) error {
 }
 
 func validatorKeys(e *ExecutionEngine) error {
-	if err := LogStackTrace(e, 2, "[validatorKeys]"); err != nil {
+	if err := LogStackTrace(e, 1, "[validatorKeys]"); err != nil {
 		return err
 	}
 	arrItem := PeekNStackItem(0, e)
@@ -697,7 +697,7 @@ func validatorKeys(e *ExecutionEngine) error {
 }
 
 func validatorValues(e *ExecutionEngine) error {
-	if err := LogStackTrace(e, 2, "[validatorValues]"); err != nil {
+	if err := LogStackTrace(e, 1, "[validatorValues]"); err != nil {
 		return err
 	}
 	arrItem := PeekNStackItem(0, e)
