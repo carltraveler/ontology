@@ -14,19 +14,20 @@ var DEBUGMODE_MAP = false
 func getPushData(OpCode vm.OpCode, OpReader *utils.VmReader) interface{} { // get data need to pushed on the stack. the data is in avm or just absolute number
 	var data interface{}
 	if OpCode >= vm.PUSHBYTES1 && OpCode <= vm.PUSHBYTES75 {
-		data = OpReader.ReadBytes(int(OpCode))
+		data, _ = OpReader.ReadBytes(int(OpCode))
 	}
 	switch OpCode {
 	case vm.PUSH0:
 		data = int8(0)
 	case vm.PUSHDATA1:
 		d, _ := OpReader.ReadByte()
-		data = OpReader.ReadBytes(int(d))
+		data, _ = OpReader.ReadBytes(int(d))
 	case vm.PUSHDATA2:
-		data = OpReader.ReadBytes(int(OpReader.ReadUint16()))
+		d, _ := (OpReader.ReadUint16())
+		data, _ = OpReader.ReadBytes(int(d))
 	case vm.PUSHDATA4:
-		i := int(OpReader.ReadInt32())
-		data = OpReader.ReadBytes(i)
+		i, _ := OpReader.ReadInt32()
+		data, _ = OpReader.ReadBytes(int(i))
 	case vm.PUSHM1, vm.PUSH1, vm.PUSH2, vm.PUSH3, vm.PUSH4, vm.PUSH5, vm.PUSH6, vm.PUSH7, vm.PUSH8, vm.PUSH9, vm.PUSH10, vm.PUSH11, vm.PUSH12, vm.PUSH13, vm.PUSH14, vm.PUSH15, vm.PUSH16:
 		data = int8(OpCode - vm.PUSH1 + 1)
 	}
@@ -54,18 +55,18 @@ func Dumpcode(code []byte, str string) {
 
 		switch OP {
 		case vm.SYSCALL:
-			serviceName := OpReader.ReadVarString(vm.MAX_BYTEARRAY_SIZE)
+			serviceName, _ := OpReader.ReadVarString(vm.MAX_BYTEARRAY_SIZE)
 			result = serviceName
 		case vm.APPCALL:
-			address := OpReader.ReadBytes(20)
+			address, _ := OpReader.ReadBytes(20)
 			result = address
 		}
 		if OP >= vm.PUSH0 && OP <= vm.PUSH16 {
 			data := getPushData(OP, OpReader)
 			result = data
 		} else if OP >= vm.JMP && OP <= vm.CALL {
-			offset := int(OpReader.ReadInt16())
-			result = offset
+			offset, _ := OpReader.ReadInt16()
+			result = int(offset)
 		}
 
 		position := OpReader.Position()
