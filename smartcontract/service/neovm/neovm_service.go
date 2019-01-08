@@ -268,7 +268,12 @@ func (this *NeoVmService) Invoke() (interface{}, error) {
 	}
 	this.ContextRef.PopContext()
 	this.ContextRef.PushNotifications(this.Notifications)
+
 	if this.Engine.EvaluationStack.Count() != 0 {
+		//if this.Engine.EvaluationStack.Count() > 0 {
+		//	fmt.Printf("error++++++++++++++++++++++++++++++++++%d\n", this.Engine.EvaluationStack.Count())
+		//	return nil, VM_EXEC_FAULT
+		//}
 		return this.Engine.EvaluationStack.Peek(0), nil
 	}
 	return nil, nil
@@ -336,6 +341,7 @@ func checkStackSize(engine *vm.ExecutionEngine) bool {
 			}
 		}
 	}
+	//fmt.Printf("%d, %d\n", engine.EvaluationStack.Count(), engine.AltStack.Count())
 	size += engine.EvaluationStack.Count() + engine.AltStack.Count()
 	if size > DUPLICATE_STACK_SIZE {
 		return false
