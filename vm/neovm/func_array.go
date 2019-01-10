@@ -248,6 +248,18 @@ func opKeys(e *ExecutionEngine) (VMState, error) {
 		}
 
 		PushData(e, types.NewArray(keys))
+	case *types.Array:
+		arr, err := item.GetArray()
+		if err != nil {
+			return FAULT, err
+		}
+
+		var keys []types.StackItems
+		for i := range arr {
+			keys = append(keys, types.NewInteger(big.NewInt(int64(i))))
+		}
+
+		PushData(e, types.NewArray(keys))
 	default:
 		return FAULT, errors.NewErr("Not a supported keys type")
 	}

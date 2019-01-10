@@ -614,13 +614,8 @@ func validatorRemove(e *ExecutionEngine) error {
 		if !value.IsMapKey() {
 			return errors.ERR_NOT_MAP_KEY
 		}
-		if _, ok := item.(*types.Map); !ok {
-			return errors.ERR_REMOVE_NOT_SUPPORT
-		}
 	case *types.Array:
-		if _, ok := item.(*types.Array); !ok {
-			return errors.ERR_REMOVE_NOT_SUPPORT
-		}
+		return nil
 	default:
 		return fmt.Errorf("validateRemove error: %s", errors.ERR_NOT_SUPPORT_TYPE)
 	}
@@ -676,8 +671,9 @@ func validatorKeys(e *ExecutionEngine) error {
 		return err
 	}
 	arrItem := PeekNStackItem(0, e)
-	_, ok := arrItem.(*types.Map)
-	if !ok {
+	_, ok1 := arrItem.(*types.Array)
+	_, ok2 := arrItem.(*types.Map)
+	if !ok1 && !ok2 {
 		return fmt.Errorf("validatorKeys error: %s", errors.ERR_NOT_SUPPORT_TYPE)
 	}
 	return nil
