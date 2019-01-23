@@ -67,12 +67,13 @@ func main() {
 	//codeFile := "/home/cl/github/ontology-python-compiler/testdata/test_lil.avm"
 	//codeFile := "/home/cl/github/ontology-python-compiler/testdata/test_str.avm"
 	//codeFile := "/home/cl/github/ontology-python-compiler/testdata/test_op0.avm"
-	codeFile := "/home/cl/github/ontology-python-compiler/testdata/tmp.avm"
+	//codeFile := "/home/cl/github/ontology-python-compiler/testdata/tmp.avm"
+	codeFile := "/home/cl/github/ontology-python-compiler/testdata/xx.avm"
 	//codeFile := "/home/cl/github/ontology-python-compiler/ontology/lib/string.avm"
 	//codeFile := "/home/cl/github/neo-boa/testdata/test_op.avm"
 
 	makemap.DEBUGMODE_MAP = true
-	//makemap.DEBUGMODE_MAP = false
+	makemap.DEBUGMODE_MAP = false
 
 	//makemap.Makemap()
 

@@ -270,10 +270,10 @@ func (this *NeoVmService) Invoke() (interface{}, error) {
 	this.ContextRef.PushNotifications(this.Notifications)
 
 	if this.Engine.EvaluationStack.Count() != 0 {
-		//if this.Engine.EvaluationStack.Count() > 0 {
-		//	fmt.Printf("error++++++++++++++++++++++++++++++++++%d\n", this.Engine.EvaluationStack.Count())
-		//	return nil, VM_EXEC_FAULT
-		//}
+		if this.Engine.EvaluationStack.Count() > 0 {
+			fmt.Printf("error++++++++++++++++++++++++++++++++++%d\n", this.Engine.EvaluationStack.Count())
+			return nil, VM_EXEC_FAULT
+		}
 		return this.Engine.EvaluationStack.Peek(0), nil
 	}
 	return nil, nil
