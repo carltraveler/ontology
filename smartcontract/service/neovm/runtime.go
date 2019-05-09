@@ -20,6 +20,7 @@ package neovm
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"reflect"
 	"sort"
@@ -110,6 +111,7 @@ func RuntimeNotify(service *NeoVmService, engine *vm.ExecutionEngine) error {
 
 // RuntimeLog push smart contract execute event log to client
 func RuntimeLog(service *NeoVmService, engine *vm.ExecutionEngine) error {
+	item_t := vm.PeekStackItem(engine)
 	item, err := vm.PopByteArray(engine)
 	if err != nil {
 		return err
@@ -117,6 +119,24 @@ func RuntimeLog(service *NeoVmService, engine *vm.ExecutionEngine) error {
 	context := service.ContextRef.CurrentContext()
 	txHash := service.Tx.Hash()
 	event.PushSmartCodeEvent(txHash, 0, event.EVENT_LOG, &event.LogEventArgs{TxHash: txHash, ContractAddress: context.ContractAddress, Message: string(item)})
+
+	switch item_t.(type) {
+	case *vmtypes.Integer:
+		stackItem := item_t.(*vmtypes.Integer)
+		value, err := stackItem.GetBigInteger()
+		if err != nil {
+			return err
+		}
+		fmt.Printf("10 Integer: %d\n", value)
+		fmt.Printf("16 Integer: %x\n", value)
+	case *vmtypes.ByteArray:
+		fmt.Printf("bytearray as string: %s\n", (item))
+		fmt.Printf("ByteArray as 16 integer: %x\n", (item))
+		fmt.Printf("ByteArray as vector: %v\n", (item))
+	default:
+		fmt.Printf("%s\n", "Can not handle this type message")
+	}
+
 	return nil
 }
 

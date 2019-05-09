@@ -32,6 +32,7 @@ import (
 	"github.com/ontio/ontology/smartcontract/context"
 	"github.com/ontio/ontology/smartcontract/event"
 	"github.com/ontio/ontology/smartcontract/storage"
+	"github.com/ontio/ontology/smartcontract/test/makemap"
 	vm "github.com/ontio/ontology/vm/neovm"
 	ntypes "github.com/ontio/ontology/vm/neovm/types"
 )
@@ -172,6 +173,19 @@ func (this *NeoVmService) Invoke() (interface{}, error) {
 				return nil, ERR_GAS_INSUFFICIENT
 			}
 		}
+
+		//fmt.Printf("0x%02x\n", this.Engine.OpCode)
+
+		if makemap.DEBUGMODE_MAP {
+			fmt.Printf("offset: %d\t OpCode:%d\t OpName:", this.Engine.Context.GetInstructionPointer()-1, this.Engine.OpCode)
+			if this.Engine.OpCode >= vm.PUSHBYTES1 && this.Engine.OpCode <= vm.PUSHBYTES75 {
+				fmt.Printf("%s%d\n", "PUSHBYTES", this.Engine.OpCode)
+			} else {
+				fmt.Printf("%s\n", makemap.Codemap[this.Engine.OpCode])
+			}
+		}
+		//debug.PrintStack()
+
 		switch this.Engine.OpCode {
 		case vm.VERIFY:
 			if vm.EvaluationStackCount(this.Engine) < 3 {
@@ -207,6 +221,7 @@ func (this *NeoVmService) Invoke() (interface{}, error) {
 			if err != nil {
 				return nil, fmt.Errorf("[Appcall] read contract address error: %v", err)
 			}
+			fmt.Printf("read000 %x\n", address)
 			if bytes.Compare(address, BYTE_ZERO_20) == 0 {
 				if vm.EvaluationStackCount(this.Engine) < 1 {
 					return nil, fmt.Errorf("[Appcall] too few input parameters: %d", vm.EvaluationStackCount(this.Engine))
@@ -215,6 +230,7 @@ func (this *NeoVmService) Invoke() (interface{}, error) {
 				if err != nil {
 					return nil, fmt.Errorf("[Appcall] pop contract address error: %v", err)
 				}
+				fmt.Printf("read111 %x\n", address)
 				if len(address) != 20 {
 					return nil, fmt.Errorf("[Appcall] pop contract address len != 20: %x", address)
 				}
@@ -251,6 +267,10 @@ func (this *NeoVmService) Invoke() (interface{}, error) {
 	this.ContextRef.PopContext()
 	this.ContextRef.PushNotifications(this.Notifications)
 	if this.Engine.EvaluationStack.Count() != 0 {
+		if this.Engine.EvaluationStack.Count() > 0 {
+			fmt.Printf("error++++++++++++++++++++++++++++++++++%d\n", this.Engine.EvaluationStack.Count())
+			return nil, VM_EXEC_FAULT
+		}
 		return this.Engine.EvaluationStack.Peek(0), nil
 	}
 	return nil, nil
@@ -262,6 +282,7 @@ func (this *NeoVmService) SystemCall(engine *vm.ExecutionEngine) error {
 	if err != nil {
 		return err
 	}
+	fmt.Printf("syscall service Name:%s\n", serviceName)
 	service, ok := ServiceMap[serviceName]
 	if !ok {
 		return errors.NewErr(fmt.Sprintf("[SystemCall] the given service is not supported: %s", serviceName))
