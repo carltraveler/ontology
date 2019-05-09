@@ -1,0 +1,119 @@
+/*
+ * Copyright (C) 2018 The ontology Authors
+ * This file is part of The ontology library.
+ *
+ * The ontology is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The ontology is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with The ontology.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package main
+
+import (
+	"fmt"
+	"os"
+	"os/exec"
+	"strings"
+	//"github.com/ontio/ontology/common"
+	"github.com/ontio/ontology/core/types"
+	. "github.com/ontio/ontology/smartcontract"
+	"github.com/ontio/ontology/smartcontract/test/makemap"
+	"io/ioutil"
+	//"os"
+	//"strings"
+)
+
+func pathExists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, err
+}
+
+func main() {
+	makemap.DEBUGMODE_MAP = false
+	//makemap.DEBUGMODE_MAP = true
+	testdir := "/home/cl/github/compiler4/ontology-python-compiler/ontology_test/example/OffChainOp/"
+	//testdir := "/home/cl/github/tmp/ontology-python-compiler/testdata/test/"
+	//codeFile := [...]string{"funcall", "IterTest5", "IterTest6", "test_append_remove", "test_boolop", "test_call_and_if", "test_compare", "test_dict0", "test_dict1", "test_dict_com0", "test_dict_com1", "test_dict_com2", "test_dict", "test_equal_not", "test_Fibonacci", "test_global", "test_list_com", "test_slice", "test_state", "test_while1", "test_while2", "test_while", "ifexpr", "test_for", "BinopTest", "test_elt_in", "isnot", "test_reverse_reversed", "str2int", "test_split", "test_hex2byte_and_bytereverse", "str2int", "test_lil", "test_bytes2str", "test_div", "test_str", "test_boolop_1", "test_boolop_origin", "test_compare_1", "test_for_1", "test_while_3", "test_in", "test_default_vararg", "test_concat", "test_range", "test_join_mulconcat"}
+
+	arg := "cd " + testdir + ";" + "ls *.avm"
+	cmd := exec.Command("bash", "-c", arg)
+	out, _ := cmd.Output()
+	out0 := strings.Split(string(out), "\n")
+	fmt.Println((out0))
+	fmt.Println(len(out0))
+	kk := 0
+
+	for i := 0; i < len(out0); i++ {
+		codefile_run := out0[i]
+
+		if codefile_run == "" {
+			continue
+		}
+
+		fmt.Printf("Running file : %s\n", codefile_run)
+
+		CheckExist, err := pathExists(testdir + codefile_run)
+		if err != nil {
+			fmt.Printf("File:%s. ERROR: %s", codefile_run)
+			return
+		}
+
+		if CheckExist == false {
+			fmt.Printf("File:%s not exist\n")
+			return
+		}
+
+		codeStr, err := ioutil.ReadFile(testdir + codefile_run)
+
+		if err != nil {
+			fmt.Printf("Please specify code file.\n")
+			return
+		}
+
+		evilBytecode := codeStr
+		config := &Config{
+			Time:   10,
+			Height: 10,
+			Tx:     &types.Transaction{},
+		}
+
+		sc := SmartContract{
+			Config:  config,
+			Gas:     1000000000,
+			CacheDB: nil,
+		}
+
+		engine, err := sc.NewExecuteEngine(evilBytecode)
+
+		if err != nil {
+			fmt.Printf("0ERROR runned: %s\n", err)
+			return
+		}
+		_, err = engine.Invoke()
+
+		if err != nil {
+			fmt.Printf("1ERROR runned: %s\n", err)
+			return
+		}
+
+		kk = kk + 1
+		print("done\n")
+	}
+
+	fmt.Printf("all testbench ok. kk = %d\n", kk)
+}
