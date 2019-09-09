@@ -11,7 +11,7 @@ set -x
 #which ontio-wasm-build || cargo install --git=https://github.com/ontio/ontio-wasm-build
 #
 ## build rust wasm contracts
-#mkdir -p testwasmdata
+mkdir -p testwasmdata
 #cd contracts-rust && bash travis.build.sh && cd ../
 
 cd contracts-cplus && bash travis.build.bash && cd ../
