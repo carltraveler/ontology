@@ -18,6 +18,8 @@ do
 	$compilerdir/ont_cpp $f -lbase58 -lcrypto -lbuiltins -o  ${f%.cpp}.wasm
 done
 
+rm -rf ontology-wasm-cdt-cpp
+
 mv *.wasm ../testwasmdata/
 rm *.wasm.str
 
