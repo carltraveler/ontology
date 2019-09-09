@@ -12,6 +12,7 @@ compilerdir="./ontology-wasm-cdt-cpp/install/bin"
 #docker run -v $(pwd):/root/contracts ontowasm '/bin/bash<<<"export PATH=$PATH:/ontowasm/bin; mkdir -p /root/contracts; cd /root/contracts; for f in *.cpp; do ont_cpp $f -lbase58 -lcrypto -lbuiltins -o  ${f%.cpp}.wasm; done"'
 #compilerdir="./ontology-wasm-cdt-cpp/install/bin"
 
+
 for f in *.cpp
 do
 	$compilerdir/ont_cpp $f -lbase58 -lcrypto -lbuiltins -o  ${f%.cpp}.wasm
