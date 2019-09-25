@@ -8,7 +8,7 @@ if ! which rustup ; then
 	source $HOME/.cargo/env
 fi
 
-if ! which clang-9 ; hen
+if ! which clang-9 ; then
 	wget releases.llvm.org/9.0.0/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz
 	tar xvf clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz
 	export PATH=$PATH:"$(pwd)/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04/bin"
