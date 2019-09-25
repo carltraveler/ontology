@@ -5,7 +5,9 @@ oldir=$(pwd)
 currentdir=$(dirname $0)
 cd $currentdir
 
-git clone -b compile https://github.com/carltraveler/ontology-wasm-cdt-cpp
+
+--recursive
+git clone  --recursive -b compile https://github.com/carltraveler/ontology-wasm-cdt-cpp
 cd ontology-wasm-cdt-cpp && bash compiler_install.bash && cd ../
 compilerdir="./ontology-wasm-cdt-cpp/install/bin"
 
