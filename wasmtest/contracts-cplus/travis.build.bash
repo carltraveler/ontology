@@ -5,7 +5,9 @@ oldir=$(pwd)
 currentdir=$(dirname $0)
 cd $currentdir
 
-git clone https://github.com/ontio/ontology-wasm-cdt-cpp
+git clone https://github.com/carltraveler/ontology-wasm-cdt-cpp
+git checkout compile
+cd ontology-wasm-cdt-cpp; bash compiler_install.bash ; cd ../
 compilerdir="./ontology-wasm-cdt-cpp/install/bin"
 
 for f in $(ls *.cpp)
