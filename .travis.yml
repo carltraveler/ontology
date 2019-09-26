@@ -1,4 +1,5 @@
 dist: bionic
+compiler: gcc
 
 language: go
 
