@@ -16,7 +16,7 @@ if ! which clang-9 ; then
 fi
 
 #rustup target add wasm32-unknown-unknown
-which ontio-wasm-build || cargo install --git=https://github.com/ontio/ontio-wasm-build
+#which ontio-wasm-build || cargo install --git=https://github.com/ontio/ontio-wasm-build
 
 # build rust wasm contracts
 mkdir -p testwasmdata
@@ -25,9 +25,9 @@ mkdir -p testwasmdata
 cd contracts-cplus && bash travis.build.bash && cd ../
 
 # verify and optimize wasm contract
-for wasm in testwasmdata/*.wasm ; do
-	ontio-wasm-build $wasm $wasm
-done
+#for wasm in testwasmdata/*.wasm ; do
+#	ontio-wasm-build $wasm $wasm
+#done
 
 # start test framework
 go run wasm-test.go
