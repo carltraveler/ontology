@@ -9,7 +9,7 @@ set -x
 #fi
 
 if ! which clang-9 ; then
-	sudo apt remove clang
+	sudo apt remove clang llvm
 	wget releases.llvm.org/9.0.0/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz
 	tar xvf clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz
 	export PATH=$PATH:"$(pwd)/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04/bin"
