@@ -17,6 +17,13 @@
  */
 package wasmvm
 
+/*
+#cgo CFLAGS: -I.
+#cgo LDFLAGS: -L. -lwasmjit
+#include "wasm_service.h"
+*/
+import "C"
+
 import (
 	"github.com/go-interpreter/wagon/exec"
 	"github.com/hashicorp/golang-lru"
@@ -102,6 +109,26 @@ func (this *WasmVmService) Invoke() (interface{}, error) {
 	if err != nil {
 		return nil, errors.NewErr("not a wasm contract")
 	}
+
+	inter_chain := C.struct_InterOpCtx{
+		height:          C.int(20),
+		block_hash:      (*C.uchar)((unsafe.Pointer)(&this.BlockHash[0])),
+		timestamp:       C.longlong(2),
+		tx_hash:         (*C.uchar)((unsafe.Pointer)(&this.BlockHash[0])),
+		self_address:    (*C.uchar)((unsafe.Pointer)(&contract.Address[0])),
+		callers:         (*C.uchar)((unsafe.Pointer)(nil)),
+		caller_num:      C.ulong(0),
+		witness:         (*C.uchar)((unsafe.Pointer)(&contract.Address[0])),
+		witness_num:     C.ulong(0),
+		input:           (*C.uchar)((unsafe.Pointer)(&contract.Args[0])),
+		input_len:       C.ulong(len(contract.Args)),
+		gas_left:        C.longlong(0),
+		call_output:     (*C.uchar)((unsafe.Pointer)(&contract.Args[0])),
+		call_output_len: C.ulong(0),
+	}
+
+	C.ontio_call_invoke((*C.uchar)((unsafe.Pointer)(&wasmCode[0])), inter_chain)
+
 	this.ContextRef.PushContext(&context.Context{ContractAddress: contract.Address, Code: wasmCode})
 	host := &Runtime{Service: this, Input: contract.Args}
 
