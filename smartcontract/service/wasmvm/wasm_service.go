@@ -19,12 +19,14 @@ package wasmvm
 
 /*
 #cgo CFLAGS: -I.
-#cgo LDFLAGS: -L. -lwasmjit
+#cgo LDFLAGS: -L. -lwasmjit -ldl
 #include "wasm_service.h"
 */
 import "C"
 
 import (
+	"unsafe"
+
 	"github.com/go-interpreter/wagon/exec"
 	"github.com/hashicorp/golang-lru"
 	"github.com/ontio/ontology/common"
@@ -113,16 +115,16 @@ func (this *WasmVmService) Invoke() (interface{}, error) {
 	inter_chain := C.InterOpCtx{
 		height:          C.uint(20),
 		block_hash:      (*C.uchar)((unsafe.Pointer)(&this.BlockHash[0])),
-		timestamp:       C.longlong(2),
+		timestamp:       C.ulong(2),
 		tx_hash:         (*C.uchar)((unsafe.Pointer)(&this.BlockHash[0])),
 		self_address:    (*C.uchar)((unsafe.Pointer)(&contract.Address[0])),
 		callers:         (*C.uchar)((unsafe.Pointer)(nil)),
-		caller_num:      C.ulong(0),
+		callers_num:     C.ulong(0),
 		witness:         (*C.uchar)((unsafe.Pointer)(&contract.Address[0])),
 		witness_num:     C.ulong(0),
 		input:           (*C.uchar)((unsafe.Pointer)(&contract.Args[0])),
 		input_len:       C.ulong(len(contract.Args)),
-		gas_left:        C.longlong(0),
+		gas_left:        C.ulong(0),
 		call_output:     (*C.uchar)((unsafe.Pointer)(&contract.Args[0])),
 		call_output_len: C.ulong(0),
 	}

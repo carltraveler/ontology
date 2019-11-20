@@ -2,7 +2,7 @@
 
 typedef struct {
 	uint32_t		height;
-	uint8_t*		bloc_khash;
+	uint8_t*		block_hash;
 	uint64_t		timestamp;
 	uint8_t*		tx_hash;
 	uint8_t*		self_address;
