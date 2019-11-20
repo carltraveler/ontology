@@ -111,7 +111,7 @@ func (this *WasmVmService) Invoke() (interface{}, error) {
 	}
 
 	inter_chain := C.struct_InterOpCtx{
-		height:          C.int(20),
+		height:          C.uint(20),
 		block_hash:      (*C.uchar)((unsafe.Pointer)(&this.BlockHash[0])),
 		timestamp:       C.longlong(2),
 		tx_hash:         (*C.uchar)((unsafe.Pointer)(&this.BlockHash[0])),
@@ -127,7 +127,7 @@ func (this *WasmVmService) Invoke() (interface{}, error) {
 		call_output_len: C.ulong(0),
 	}
 
-	C.ontio_call_invoke((*C.uchar)((unsafe.Pointer)(&wasmCode[0])), inter_chain)
+	C.ontio_call_invoke((*C.uchar)((unsafe.Pointer)(&wasmCode[0])), C.uint(len(wasmCode)), inter_chain)
 
 	this.ContextRef.PushContext(&context.Context{ContractAddress: contract.Address, Code: wasmCode})
 	host := &Runtime{Service: this, Input: contract.Args}

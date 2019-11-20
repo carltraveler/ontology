@@ -18,4 +18,4 @@ typedef struct InterOpCtx {
 } InterOpCtx;
 
 
-void ontio_call_invoke(uint8_t *code, InterOpCtx ctx);
+void ontio_call_invoke(uint8_t *code, uint32_t codelen, InterOpCtx ctx);
