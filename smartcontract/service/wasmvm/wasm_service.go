@@ -110,7 +110,7 @@ func (this *WasmVmService) Invoke() (interface{}, error) {
 		return nil, errors.NewErr("not a wasm contract")
 	}
 
-	inter_chain := C.struct_InterOpCtx{
+	inter_chain := C.InterOpCtx{
 		height:          C.uint(20),
 		block_hash:      (*C.uchar)((unsafe.Pointer)(&this.BlockHash[0])),
 		timestamp:       C.longlong(2),

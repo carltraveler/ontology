@@ -1,6 +1,6 @@
 #include<stdint.h>
 
-typedef struct InterOpCtx {
+typedef struct {
 	uint32_t		height;
 	uint8_t*		bloc_khash;
 	uint64_t		timestamp;
