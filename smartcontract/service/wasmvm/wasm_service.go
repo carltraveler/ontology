@@ -32,7 +32,6 @@ import (
 	"github.com/go-interpreter/wagon/exec"
 	"github.com/hashicorp/golang-lru"
 	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/common/log"
 	"github.com/ontio/ontology/core/store"
 	"github.com/ontio/ontology/core/types"
 	"github.com/ontio/ontology/errors"
@@ -106,20 +105,6 @@ func GetAddressBuff(addrs []common.Address) ([]byte, int) {
 	return addrsBuff, addrsLen
 }
 
-//export ontio_debug_cgo
-func ontio_debug_cgo(vmctx *C.uchar, data_ptr uint32, data_len uint32) uint32 {
-	fmt.Printf("DebugCgo enter\n")
-	bs := make([]byte, data_len)
-	err := C.ontio_read_wasmvm_memory(vmctx, (*C.uchar)(unsafe.Pointer(&bs[0])), C.uint(data_ptr), C.uint(data_len))
-
-	if uint32(err) == 0 {
-		return 0 //false
-	}
-	log.Infof("[WasmContract]Debug:%s\n", bs)
-
-	return 1 //true
-}
-
 func (this *WasmVmService) SetContextData() {
 	ctxDataMtx.Lock()
 	ctxData[nextCtxDataIdx] = this
@@ -159,42 +144,9 @@ func (this *WasmVmService) Invoke() (interface{}, error) {
 
 	fmt.Printf("blockhash :%v\n", this.BlockHash)
 
-	txHash := this.Tx.Hash()
-	witnessAddrBuff, witnessAddrBuffLen := GetAddressBuff(this.Tx.GetSignatureAddresses())
-	callersAddrBuff, callersAddrBuffLen := GetAddressBuff(this.ContextRef.GetCallerAddress())
-	fmt.Printf("witnessAddrBuffLen: %d\n", witnessAddrBuffLen/20)
-	fmt.Printf("callersAddrLen : %d\n", callersAddrBuffLen/20)
-
-	var witnessptr *C.uchar
-
-	if witnessAddrBuffLen == 0 {
-		witnessptr = (*C.uchar)((unsafe.Pointer)(nil))
-	} else {
-		witnessptr = (*C.uchar)((unsafe.Pointer)(&witnessAddrBuff[0]))
-	}
-
-	inter_chain := C.InterOpCtx{
-		height:             C.uint(this.Height),
-		block_hash:         (*C.uchar)((unsafe.Pointer)(&this.BlockHash[0])),
-		timestamp:          C.ulonglong(this.Time),
-		tx_hash:            (*C.uchar)((unsafe.Pointer)(&(txHash[0]))),
-		self_address:       (*C.uchar)((unsafe.Pointer)(&contract.Address[0])),
-		callers:            (*C.uchar)((unsafe.Pointer)(&callersAddrBuff[0])),
-		callers_num:        C.ulong(callersAddrBuffLen),
-		witness:            witnessptr,
-		witness_num:        C.ulong(witnessAddrBuffLen),
-		input:              (*C.uchar)((unsafe.Pointer)(&contract.Args[0])),
-		input_len:          C.ulong(len(contract.Args)),
-		wasmvm_service_ptr: C.ulonglong(this.wasmVmServicePtr),
-		gas_left:           C.ulonglong(0),
-		call_output:        (*C.uchar)((unsafe.Pointer)(&contract.Args[0])),
-		call_output_len:    C.ulong(0),
-	}
-
-	fmt.Printf("wasm invoke 00000\n")
-	C.ontio_call_invoke((*C.uchar)((unsafe.Pointer)(&wasmCode[0])), C.uint(len(wasmCode)), inter_chain)
-	fmt.Printf("wasm invoke 11111\n")
 	host := &Runtime{Service: this, Input: contract.Args}
+
+	invokeJit(this, contract, wasmCode)
 
 	//var compiled *exec.CompiledModule
 	//if CodeCache != nil {
