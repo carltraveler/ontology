@@ -107,11 +107,17 @@ func GetAddressBuff(addrs []common.Address) ([]byte, int) {
 }
 
 //export ontio_debug_cgo
-func ontio_debug_cgo(vmctx *C.uchar, data_ptr uint32, data_len uint32) {
+func ontio_debug_cgo(vmctx *C.uchar, data_ptr uint32, data_len uint32) uint32 {
 	fmt.Printf("DebugCgo enter\n")
 	bs := make([]byte, data_len)
-	C.ontio_read_wasmvm_memory(vmctx, (*C.uchar)(unsafe.Pointer(&bs[0])), C.uint(data_ptr), C.uint(data_len))
-	log.Debugf("[WasmContract]Debug:%s\n", bs)
+	err := C.ontio_read_wasmvm_memory(vmctx, (*C.uchar)(unsafe.Pointer(&bs[0])), C.uint(data_ptr), C.uint(data_len))
+
+	if uint32(err) == 0 {
+		return 0 //false
+	}
+	log.Infof("[WasmContract]Debug:%s\n", bs)
+
+	return 1 //true
 }
 
 func (this *WasmVmService) SetContextData() {

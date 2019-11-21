@@ -25,5 +25,5 @@ typedef struct {
 
 
 void ontio_call_invoke(uint8_t *code, uint32_t codelen, InterOpCtx ctx);
-void ontio_read_wasmvm_memory(uint8_t* vmtcx, uint8_t* buff, uint32_t data_ptr, uint32_t l);
+uint32_t ontio_read_wasmvm_memory(uint8_t* vmtcx, uint8_t* buff, uint32_t data_ptr, uint32_t l);
 #endif
