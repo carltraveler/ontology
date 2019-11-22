@@ -23,7 +23,20 @@ typedef struct {
 	size_t				call_output_len;
 } InterOpCtx;
 
+typedef struct {
+	uint32_t err;
+	uint8_t* errmsg;
+} Cgovoid;
 
-void ontio_call_invoke(uint8_t *code, uint32_t codelen, InterOpCtx ctx);
-uint32_t ontio_read_wasmvm_memory(uint8_t* vmtcx, uint8_t* buff, uint32_t data_ptr, uint32_t l);
+typedef struct {
+	uint8_t* output;
+	uint32_t outputlen;
+	uint32_t err;
+	uint8_t* errmsg;
+} Cgooutput;
+
+
+Cgooutput ontio_call_invoke(uint8_t *code, uint32_t codelen, InterOpCtx ctx);
+void ontio_free_cgooutput(Cgooutput output);
+Cgovoid ontio_read_wasmvm_memory(uint8_t* vmtcx, uint8_t* buff, uint32_t data_ptr, uint32_t l);
 #endif

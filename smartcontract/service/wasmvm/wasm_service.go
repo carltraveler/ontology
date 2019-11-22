@@ -144,9 +144,12 @@ func (this *WasmVmService) Invoke() (interface{}, error) {
 
 	fmt.Printf("blockhash :%v\n", this.BlockHash)
 
-	host := &Runtime{Service: this, Input: contract.Args}
+	//host := &Runtime{Service: this}
 
-	invokeJit(this, contract, wasmCode)
+	output, err := invokeJit(this, contract, wasmCode)
+	if err != nil {
+		return nil, err
+	}
 
 	//var compiled *exec.CompiledModule
 	//if CodeCache != nil {
@@ -209,5 +212,5 @@ func (this *WasmVmService) Invoke() (interface{}, error) {
 	//pop the current context
 	this.ContextRef.PopContext()
 
-	return host.Output, nil
+	return output, nil
 }

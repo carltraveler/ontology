@@ -30,27 +30,28 @@ import (
 	"unsafe"
 
 	"github.com/ontio/ontology/common/log"
+	"github.com/ontio/ontology/errors"
 	"github.com/ontio/ontology/smartcontract/states"
 )
 
 // c to call go interface
 
 //export ontio_debug_cgo
-func ontio_debug_cgo(vmctx *C.uchar, data_ptr uint32, data_len uint32) uint32 {
-	fmt.Printf("DebugCgo enter\n")
+func ontio_debug_cgo(vmctx *C.uchar, data_ptr uint32, data_len uint32) C.Cgovoid {
+	fmt.Printf("ontio_debug_cgo enter\n")
 	bs := make([]byte, data_len)
 	err := C.ontio_read_wasmvm_memory(vmctx, (*C.uchar)(unsafe.Pointer(&bs[0])), C.uint(data_ptr), C.uint(data_len))
 
-	if uint32(err) == 0 {
-		return 0 //false
+	if uint32(err.err) != 0 {
+		return err //false
 	}
 	log.Infof("[WasmContract]Debug:%s\n", bs)
 
-	return 1 //true
+	return C.Cgovoid{err: 0} //true
 }
 
 // call to c
-func invokeJit(this *WasmVmService, contract *states.WasmContractParam, wasmCode []byte) {
+func invokeJit(this *WasmVmService, contract *states.WasmContractParam, wasmCode []byte) ([]byte, error) {
 	txHash := this.Tx.Hash()
 	witnessAddrBuff, witnessAddrBuffLen := GetAddressBuff(this.Tx.GetSignatureAddresses())
 	callersAddrBuff, callersAddrBuffLen := GetAddressBuff(this.ContextRef.GetCallerAddress())
@@ -84,6 +85,15 @@ func invokeJit(this *WasmVmService, contract *states.WasmContractParam, wasmCode
 	}
 
 	fmt.Printf("wasm invoke 00000\n")
-	C.ontio_call_invoke((*C.uchar)((unsafe.Pointer)(&wasmCode[0])), C.uint(len(wasmCode)), inter_chain)
+	output := C.ontio_call_invoke((*C.uchar)((unsafe.Pointer)(&wasmCode[0])), C.uint(len(wasmCode)), inter_chain)
+	if output.err != 0 {
+		err := errors.NewErr(C.GoString((*C.char)((unsafe.Pointer)(output.errmsg))))
+		C.ontio_free_cgooutput(output)
+		return nil, err
+	}
+
 	fmt.Printf("wasm invoke 11111\n")
+	outputbuffer := C.GoBytes((unsafe.Pointer)(output.output), (C.int)(output.outputlen))
+	C.ontio_free_cgooutput(output)
+	return outputbuffer, nil
 }
