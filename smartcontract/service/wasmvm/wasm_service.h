@@ -26,7 +26,7 @@ typedef struct {
 typedef struct {
 	uint32_t err;
 	uint8_t* errmsg;
-} Cgovoid;
+} Cgoerror;
 
 typedef struct {
 	uint8_t* output;
@@ -38,5 +38,5 @@ typedef struct {
 
 Cgooutput ontio_call_invoke(uint8_t *code, uint32_t codelen, InterOpCtx ctx);
 void ontio_free_cgooutput(Cgooutput output);
-Cgovoid ontio_read_wasmvm_memory(uint8_t* vmtcx, uint8_t* buff, uint32_t data_ptr, uint32_t l);
+Cgoerror ontio_read_wasmvm_memory(uint8_t* vmtcx, uint8_t* buff, uint32_t data_ptr, uint32_t l);
 #endif

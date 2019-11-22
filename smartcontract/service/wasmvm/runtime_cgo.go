@@ -37,7 +37,7 @@ import (
 // c to call go interface
 
 //export ontio_debug_cgo
-func ontio_debug_cgo(vmctx *C.uchar, data_ptr uint32, data_len uint32) C.Cgovoid {
+func ontio_debug_cgo(vmctx *C.uchar, data_ptr uint32, data_len uint32) C.Cgoerror {
 	fmt.Printf("ontio_debug_cgo enter\n")
 	bs := make([]byte, data_len)
 	err := C.ontio_read_wasmvm_memory(vmctx, (*C.uchar)(unsafe.Pointer(&bs[0])), C.uint(data_ptr), C.uint(data_len))
@@ -47,7 +47,7 @@ func ontio_debug_cgo(vmctx *C.uchar, data_ptr uint32, data_len uint32) C.Cgovoid
 	}
 	log.Infof("[WasmContract]Debug:%s\n", bs)
 
-	return C.Cgovoid{err: 0} //true
+	return C.Cgoerror{err: 0} //true
 }
 
 // call to c

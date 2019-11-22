@@ -29,6 +29,11 @@ class hello: public contract {
 			printf("%s\n", str.c_str());
 			printf("out mydebug");
 		}
+
+		uint128_t myadd(uint128_t a, uint128_t b) {
+			printf("my add enter\n");
+			return a + b;
+		}
 };
 
-ONTIO_DISPATCH( hello, (mypanic)(mydebug))
+ONTIO_DISPATCH( hello, (mypanic)(mydebug)(myadd))
