@@ -36,6 +36,7 @@ import (
 	"github.com/ontio/ontology/core/payload"
 	"github.com/ontio/ontology/core/types"
 	"github.com/ontio/ontology/errors"
+	"github.com/ontio/ontology/smartcontract/event"
 	native2 "github.com/ontio/ontology/smartcontract/service/native"
 	"github.com/ontio/ontology/smartcontract/service/native/utils"
 	"github.com/ontio/ontology/smartcontract/service/util"
@@ -82,7 +83,7 @@ func jitErr(err error) C.Cgoerror {
 	s := err.Error()
 	ptr := C.CBytes([]byte(s))
 	l := len(s)
-	cgoerr := C.ontio_err_from_cstring((*C.uchar)(ptr), (C.uint)(l))
+	cgoerr := C.ontio_error((*C.uchar)(ptr), (C.uint)(l))
 	C.free(ptr)
 	return cgoerr
 }
@@ -106,17 +107,42 @@ func setCallOutPut(vmctx *C.uchar, result []byte) C.Cgoerror {
 
 // c to call go interface
 
-//export ontio_debug_cgo
-func ontio_debug_cgo(vmctx *C.uchar, data_ptr uint32, data_len uint32) C.Cgoerror {
-	fmt.Printf("ontio_debug_cgo enter\n")
-	bs, err := jitRreadWasmMemory(vmctx, data_ptr, data_len)
+//export ontio_notify_cgo
+func ontio_notify_cgo(vmctx *C.uchar, ptr uint32, l uint32) C.Cgoerror {
+	if l >= neotypes.MAX_NOTIFY_LENGTH {
+		return jitErr(errors.NewErr("notify length over the uplimit"))
+	}
 
+	Service, err := jitService(vmctx)
 	if uint32(err.err) != 0 {
 		return err
 	}
-	log.Infof("[WasmContract]Debug:%s\n", bs)
 
-	return C.Cgoerror{err: 0} //true
+	bs, err := jitRreadWasmMemory(vmctx, ptr, l)
+	if uint32(err.err) != 0 {
+		return err
+	}
+
+	notify := &event.NotifyEventInfo{ContractAddress: Service.ContextRef.CurrentContext().ContractAddress}
+	val := crossvm_codec.DeserializeNotify(bs)
+	notify.States = val
+
+	notifys := make([]*event.NotifyEventInfo, 1)
+	notifys[0] = notify
+	Service.ContextRef.PushNotifications(notifys)
+
+	return C.Cgoerror{err: 0}
+}
+
+//export ontio_debug_cgo
+func ontio_debug_cgo(vmctx *C.uchar, data_ptr uint32, data_len uint32) C.Cgoerror {
+	bs, err := jitRreadWasmMemory(vmctx, data_ptr, data_len)
+	if uint32(err.err) != 0 {
+		return err
+	}
+
+	log.Infof("[WasmContract]Debug:%s\n", bs)
+	return C.Cgoerror{err: 0}
 }
 
 //export ontio_call_contract_cgo

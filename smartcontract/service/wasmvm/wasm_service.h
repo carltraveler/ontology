@@ -47,7 +47,7 @@ Cgooutput ontio_call_invoke(uint8_t *code, uint32_t codelen, InterOpCtx ctx);
 void ontio_free_cgooutput(Cgooutput output);
 Cgobuffer ontio_read_wasmvm_memory(uint8_t* vmctx, uint32_t data_ptr, uint32_t l);
 void ontio_memfree(uint8_t* mem);
-Cgoerror ontio_err_from_cstring(uint8_t *ptr, uint32_t len);
+Cgoerror ontio_error(uint8_t *ptr, uint32_t len);
 Cgou64 ontio_wasm_service_ptr(uint8_t *vmctx);
 Cgoerror ontio_set_calloutput(uint8_t *vmctx, uint8_t* buff, uint32_t size);
 #endif
