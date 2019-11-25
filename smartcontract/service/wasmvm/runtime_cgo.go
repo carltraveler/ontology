@@ -27,7 +27,6 @@ package wasmvm
 import "C"
 
 import (
-	"fmt"
 	"io"
 	"unsafe"
 
@@ -101,7 +100,14 @@ func jitService(vmctx *C.uchar) (*WasmVmService, C.Cgoerror) {
 }
 
 func setCallOutPut(vmctx *C.uchar, result []byte) C.Cgoerror {
-	err := C.ontio_set_calloutput(vmctx, (*C.uchar)((unsafe.Pointer)(&result[0])), C.uint(len(result)))
+	var err C.Cgoerror
+	if len(result) != 0 {
+		err = C.ontio_set_calloutput(vmctx, (*C.uchar)((unsafe.Pointer)(&result[0])), C.uint(len(result)))
+	} else {
+		// when call native. zero len bytes of result consider as 0.
+		err = C.ontio_set_calloutput(vmctx, (*C.uchar)((unsafe.Pointer)(nil)), C.uint(0))
+	}
+
 	return err
 }
 
@@ -272,9 +278,7 @@ func ontio_call_contract_cgo(vmctx *C.uchar, contractAddr uint32, inputPtr uint3
 		return jitErr(errors.NewErr("Not a supported contract type"))
 	}
 
-	setCallOutPut(vmctx, result)
-
-	return C.Cgoerror{err: 0}
+	return setCallOutPut(vmctx, result)
 }
 
 // call to c
@@ -282,8 +286,6 @@ func invokeJit(this *WasmVmService, contract *states.WasmContractParam, wasmCode
 	txHash := this.Tx.Hash()
 	witnessAddrBuff, witnessAddrBuffLen := GetAddressBuff(this.Tx.GetSignatureAddresses())
 	callersAddrBuff, callersAddrBuffLen := GetAddressBuff(this.ContextRef.GetCallerAddress())
-	fmt.Printf("witnessAddrBuffLen: %d\n", witnessAddrBuffLen/20)
-	fmt.Printf("callersAddrLen : %d\n", callersAddrBuffLen/20)
 
 	var witnessptr *C.uchar
 
@@ -307,20 +309,15 @@ func invokeJit(this *WasmVmService, contract *states.WasmContractParam, wasmCode
 		input_len:          C.ulong(len(contract.Args)),
 		wasmvm_service_ptr: C.ulonglong(this.wasmVmServicePtr),
 		gas_left:           C.ulonglong(0),
-		call_output:        (*C.uchar)((unsafe.Pointer)(&contract.Args[0])),
-		call_output_len:    C.ulong(0),
 	}
 
-	fmt.Printf("wasm invoke 00000\n")
 	output := C.ontio_call_invoke((*C.uchar)((unsafe.Pointer)(&wasmCode[0])), C.uint(len(wasmCode)), inter_chain)
+	defer C.ontio_free_cgooutput(output)
+
 	if output.err != 0 {
-		err := errors.NewErr(C.GoString((*C.char)((unsafe.Pointer)(output.errmsg))))
-		C.ontio_free_cgooutput(output)
-		return nil, err
+		return nil, errors.NewErr(C.GoString((*C.char)((unsafe.Pointer)(output.errmsg))))
 	}
 
-	fmt.Printf("wasm invoke 11111\n")
 	outputbuffer := C.GoBytes((unsafe.Pointer)(output.output), (C.int)(output.outputlen))
-	C.ontio_free_cgooutput(output)
 	return outputbuffer, nil
 }

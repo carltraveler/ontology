@@ -123,6 +123,7 @@ func OntTransfer(native *native.NativeService) ([]byte, error) {
 		if v.Value > constants.ONT_TOTAL_SUPPLY {
 			return utils.BYTE_FALSE, fmt.Errorf("transfer ont amount:%d over totalSupply:%d", v.Value, constants.ONT_TOTAL_SUPPLY)
 		}
+
 		fromBalance, toBalance, err := Transfer(native, contract, &v)
 		if err != nil {
 			return utils.BYTE_FALSE, err

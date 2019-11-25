@@ -19,8 +19,6 @@ typedef struct {
 	size_t				input_len;
 	uint64_t			wasmvm_service_ptr;
 	uint64_t			gas_left;
-	uint8_t*			call_output;
-	size_t				call_output_len;
 } InterOpCtx;
 
 typedef struct {
