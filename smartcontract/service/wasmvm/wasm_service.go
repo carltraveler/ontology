@@ -25,7 +25,6 @@ package wasmvm
 import "C"
 
 import (
-	"fmt"
 	"sync"
 	"unsafe"
 
@@ -106,15 +105,20 @@ func GetAddressBuff(addrs []common.Address) ([]byte, int) {
 }
 
 func (this *WasmVmService) SetContextData() {
+	defer ctxDataMtx.Unlock()
 	ctxDataMtx.Lock()
 	ctxData[nextCtxDataIdx] = this
 	this.wasmVmServicePtr = nextCtxDataIdx
 	nextCtxDataIdx++
+}
+
+func GetWasmVmService(wasmVmServicePtr uint64) *WasmVmService {
 	defer ctxDataMtx.Unlock()
+	ctxDataMtx.Lock()
+	return ctxData[wasmVmServicePtr]
 }
 
 func (this *WasmVmService) Invoke() (interface{}, error) {
-	fmt.Printf("wasm invoke enter\n")
 	if len(this.Code) == 0 {
 		return nil, ERR_EXECUTE_CODE
 	}
@@ -142,74 +146,11 @@ func (this *WasmVmService) Invoke() (interface{}, error) {
 
 	this.ContextRef.PushContext(&context.Context{ContractAddress: contract.Address, Code: wasmCode})
 
-	fmt.Printf("blockhash :%v\n", this.BlockHash)
-
-	//host := &Runtime{Service: this}
-
 	output, err := invokeJit(this, contract, wasmCode)
 	if err != nil {
 		return nil, err
 	}
 
-	//var compiled *exec.CompiledModule
-	//if CodeCache != nil {
-	//	cached, ok := CodeCache.Get(contract.Address.ToHexString())
-	//	if ok {
-	//		compiled = cached.(*exec.CompiledModule)
-	//	}
-	//}
-
-	//if compiled == nil {
-	//	compiled, err = ReadWasmModule(wasmCode, false)
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//	CodeCache.Add(contract.Address.ToHexString(), compiled)
-	//}
-
-	//vm, err := exec.NewVMWithCompiled(compiled, WASM_MEM_LIMITATION)
-	//if err != nil {
-	//	return nil, VM_INIT_FAULT
-	//}
-
-	//vm.HostData = host
-
-	//vm.AvaliableGas = &exec.Gas{GasLimit: this.GasLimit, LocalGasCounter: 0, GasPrice: this.GasPrice, GasFactor: this.GasFactor, ExecStep: this.ExecStep}
-	//vm.CallStackDepth = uint32(WASM_CALLSTACK_LIMIT)
-	//vm.RecoverPanic = true
-
-	//entryName := CONTRACT_METHOD_NAME
-
-	//entry, ok := compiled.RawModule.Export.Entries[entryName]
-
-	//if ok == false {
-	//	return nil, errors.NewErr("[Call]Method:" + entryName + " does not exist!")
-	//}
-
-	////get entry index
-	//index := int64(entry.Index)
-
-	////get function index
-	//fidx := compiled.RawModule.Function.Types[int(index)]
-
-	////get  function type
-	//ftype := compiled.RawModule.Types.Entries[int(fidx)]
-
-	////no returns of the entry function
-	//if len(ftype.ReturnTypes) > 0 {
-	//	return nil, errors.NewErr("[Call]ExecCode error! Invoke function sig error")
-	//}
-
-	////no args for passed in, all args in runtime input buffer
-	//this.vm = vm
-
-	//_, err = vm.ExecCode(index)
-
-	//if err != nil {
-	//	return nil, errors.NewErr("[Call]ExecCode error!" + err.Error())
-	//}
-
-	//pop the current context
 	this.ContextRef.PopContext()
 
 	return output, nil
