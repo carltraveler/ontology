@@ -330,7 +330,25 @@ func ontio_contract_migrate_cgo(vmctx *C.uchar,
 }
 
 //export ontio_contract_destroy_cgo
-func ontio_contract_destroy_cgo() C.Cgoerror {
+func ontio_contract_destroy_cgo(vmctx *C.uchar) C.Cgoerror {
+	Service, err := jitService(vmctx)
+	if uint32(err.err) != 0 {
+		return err
+	}
+
+	contractAddress := Service.ContextRef.CurrentContext().ContractAddress
+	iter := Service.CacheDB.NewIterator(contractAddress[:])
+
+	for has := iter.First(); has; has = iter.Next() {
+		Service.CacheDB.Delete(iter.Key())
+	}
+	iter.Release()
+	if errs := iter.Error(); errs != nil {
+		return jitErr(errs)
+	}
+
+	Service.CacheDB.DeleteContract(contractAddress)
+
 	return C.Cgoerror{err: 0}
 }
 
