@@ -101,7 +101,7 @@ func GetAddressBuff(addrs []common.Address) ([]byte, int) {
 		copy(addrsBuff[off*20:off*20+20], (*ptr)[:])
 	}
 
-	return addrsBuff, addrsLen
+	return addrsBuff, len(addrs)
 }
 
 func (this *WasmVmService) SetContextData() {
@@ -152,6 +152,5 @@ func (this *WasmVmService) Invoke() (interface{}, error) {
 	}
 
 	this.ContextRef.PopContext()
-
 	return output, nil
 }

@@ -27,6 +27,7 @@ package wasmvm
 import "C"
 
 import (
+	"fmt"
 	"io"
 	"unsafe"
 
@@ -35,6 +36,7 @@ import (
 	"github.com/ontio/ontology/core/payload"
 	"github.com/ontio/ontology/core/types"
 	"github.com/ontio/ontology/errors"
+	//"github.com/ontio/ontology/smartcontract/context"
 	"github.com/ontio/ontology/smartcontract/event"
 	native2 "github.com/ontio/ontology/smartcontract/service/native"
 	"github.com/ontio/ontology/smartcontract/service/native/utils"
@@ -284,15 +286,23 @@ func ontio_call_contract_cgo(vmctx *C.uchar, contractAddr uint32, inputPtr uint3
 // call to c
 func invokeJit(this *WasmVmService, contract *states.WasmContractParam, wasmCode []byte) ([]byte, error) {
 	txHash := this.Tx.Hash()
-	witnessAddrBuff, witnessAddrBuffLen := GetAddressBuff(this.Tx.GetSignatureAddresses())
-	callersAddrBuff, callersAddrBuffLen := GetAddressBuff(this.ContextRef.GetCallerAddress())
+	witnessAddrBuff, witnessAddrNum := GetAddressBuff(this.Tx.GetSignatureAddresses())
+	callersAddrBuff, callersAddrNum := GetAddressBuff(this.ContextRef.GetCallerAddress())
+	fmt.Printf("witnessAddrNum : %d\n", witnessAddrNum)
+	fmt.Printf("callersAddrNum : %d\n", callersAddrNum)
 
-	var witnessptr *C.uchar
+	var witnessptr, callers_ptr *C.uchar
 
-	if witnessAddrBuffLen == 0 {
+	if witnessAddrNum == 0 {
 		witnessptr = (*C.uchar)((unsafe.Pointer)(nil))
 	} else {
 		witnessptr = (*C.uchar)((unsafe.Pointer)(&witnessAddrBuff[0]))
+	}
+
+	if callersAddrNum == 0 {
+		callers_ptr = (*C.uchar)((unsafe.Pointer)(nil))
+	} else {
+		callers_ptr = (*C.uchar)((unsafe.Pointer)(&callersAddrBuff[0]))
 	}
 
 	inter_chain := C.InterOpCtx{
@@ -301,10 +311,10 @@ func invokeJit(this *WasmVmService, contract *states.WasmContractParam, wasmCode
 		timestamp:          C.ulonglong(this.Time),
 		tx_hash:            (*C.uchar)((unsafe.Pointer)(&(txHash[0]))),
 		self_address:       (*C.uchar)((unsafe.Pointer)(&contract.Address[0])),
-		callers:            (*C.uchar)((unsafe.Pointer)(&callersAddrBuff[0])),
-		callers_num:        C.ulong(callersAddrBuffLen),
+		callers:            callers_ptr,
+		callers_num:        C.ulong(callersAddrNum),
 		witness:            witnessptr,
-		witness_num:        C.ulong(witnessAddrBuffLen),
+		witness_num:        C.ulong(witnessAddrNum),
 		input:              (*C.uchar)((unsafe.Pointer)(&contract.Args[0])),
 		input_len:          C.ulong(len(contract.Args)),
 		wasmvm_service_ptr: C.ulonglong(this.wasmVmServicePtr),
