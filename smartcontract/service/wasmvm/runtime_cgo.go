@@ -376,8 +376,11 @@ func ontio_storage_read_cgo(vmctx *C.uchar, keyPtr uint32, klen uint32, val uint
 	}
 
 	cgou32 := jitWriteWasmMemory(vmctx, item[offset:offset+length], val)
+	if uint32(cgou32.err) != 0 {
+		return cgou32
+	}
 
-	return cgou32
+	return C.Cgou32{v: C.uint(len(item)), err: 0}
 }
 
 //export ontio_storage_write_cgo
