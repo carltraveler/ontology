@@ -39,11 +39,18 @@ typedef struct {
 	uint8_t* errmsg;
 } Cgou64;
 
+typedef struct {
+	uint32_t v;
+	uint32_t err;
+	uint8_t* errmsg;
+} Cgou32;
+
 typedef Cgooutput Cgobuffer;
 
 Cgooutput ontio_call_invoke(uint8_t *code, uint32_t codelen, InterOpCtx ctx);
 void ontio_free_cgooutput(Cgooutput output);
 Cgobuffer ontio_read_wasmvm_memory(uint8_t* vmctx, uint32_t data_ptr, uint32_t l);
+Cgou32 ontio_write_wasmvm_memory(uint8_t *vmctx, uint8_t* buffer, uint32_t data_ptr, uint32_t data_len);
 void ontio_memfree(uint8_t* mem);
 Cgoerror ontio_error(uint8_t *ptr, uint32_t len);
 Cgou64 ontio_wasm_service_ptr(uint8_t *vmctx);

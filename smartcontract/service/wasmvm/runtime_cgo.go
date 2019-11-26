@@ -29,6 +29,7 @@ import "C"
 import (
 	"fmt"
 	"io"
+	"math"
 	"unsafe"
 
 	"github.com/ontio/ontology/common"
@@ -37,6 +38,7 @@ import (
 	"github.com/ontio/ontology/core/types"
 	"github.com/ontio/ontology/errors"
 	//"github.com/ontio/ontology/smartcontract/context"
+	states2 "github.com/ontio/ontology/core/states"
 	"github.com/ontio/ontology/smartcontract/event"
 	native2 "github.com/ontio/ontology/smartcontract/service/native"
 	"github.com/ontio/ontology/smartcontract/service/native/utils"
@@ -66,7 +68,11 @@ func getContractType(Service *WasmVmService, addr common.Address) (ContractType,
 }
 
 // common interface
-func jitRreadWasmMemory(vmctx *C.uchar, data_ptr uint32, data_len uint32) ([]byte, C.Cgoerror) {
+func jitReadWasmMemory(vmctx *C.uchar, data_ptr uint32, data_len uint32) ([]byte, C.Cgoerror) {
+	if data_len == 0 {
+		return []byte{}, C.Cgoerror{err: 0}
+	}
+
 	cgobuffer := C.ontio_read_wasmvm_memory(vmctx, C.uint(data_ptr), C.uint(data_len))
 	if cgobuffer.err != 0 {
 		return nil, C.Cgoerror{
@@ -78,6 +84,14 @@ func jitRreadWasmMemory(vmctx *C.uchar, data_ptr uint32, data_len uint32) ([]byt
 	buff := C.GoBytes((unsafe.Pointer)(cgobuffer.output), (C.int)(cgobuffer.outputlen))
 	C.ontio_memfree(cgobuffer.output)
 	return buff, C.Cgoerror{err: 0}
+}
+
+func jitWriteWasmMemory(vmctx *C.uchar, p []byte, off uint32) C.Cgou32 {
+	if len(p) != 0 {
+		return C.ontio_write_wasmvm_memory(vmctx, (*C.uchar)((unsafe.Pointer)(&p[0])), C.uint(off), C.uint(len(p)))
+	}
+
+	return C.Cgou32{v: 0, err: 0}
 }
 
 func jitErr(err error) C.Cgoerror {
@@ -115,6 +129,305 @@ func setCallOutPut(vmctx *C.uchar, result []byte) C.Cgoerror {
 
 // c to call go interface
 
+//export ontio_contract_create_cgo
+func ontio_contract_create_cgo(vmctx *C.uchar,
+	codePtr uint32,
+	codeLen uint32,
+	vmType uint32,
+	namePtr uint32,
+	nameLen uint32,
+	verPtr uint32,
+	verLen uint32,
+	authorPtr uint32,
+	authorLen uint32,
+	emailPtr uint32,
+	emailLen uint32,
+	descPtr uint32,
+	descLen uint32,
+	newAddressPtr uint32) C.Cgou32 {
+	Service, err := jitService(vmctx)
+	if uint32(err.err) != 0 {
+		return C.Cgou32{v: 0, err: 1, errmsg: err.errmsg}
+	}
+
+	code, err := jitReadWasmMemory(vmctx, codePtr, codeLen)
+	if uint32(err.err) != 0 {
+		return C.Cgou32{v: 0, err: 1, errmsg: err.errmsg}
+	}
+
+	//cost := CONTRACT_CREATE_GAS + uint64(uint64(codeLen)/PER_UNIT_CODE_LEN)*UINT_DEPLOY_CODE_LEN_GAS
+
+	name, err := jitReadWasmMemory(vmctx, namePtr, nameLen)
+	if uint32(err.err) != 0 {
+		return C.Cgou32{v: 0, err: 1, errmsg: err.errmsg}
+	}
+
+	version, err := jitReadWasmMemory(vmctx, verPtr, verLen)
+	if uint32(err.err) != 0 {
+		return C.Cgou32{v: 0, err: 1, errmsg: err.errmsg}
+	}
+
+	author, err := jitReadWasmMemory(vmctx, authorPtr, authorLen)
+	if uint32(err.err) != 0 {
+		return C.Cgou32{v: 0, err: 1, errmsg: err.errmsg}
+	}
+
+	email, err := jitReadWasmMemory(vmctx, emailPtr, emailLen)
+	if uint32(err.err) != 0 {
+		return C.Cgou32{v: 0, err: 1, errmsg: err.errmsg}
+	}
+
+	desc, err := jitReadWasmMemory(vmctx, descPtr, descLen)
+	if uint32(err.err) != 0 {
+		return C.Cgou32{v: 0, err: 1, errmsg: err.errmsg}
+	}
+
+	dep, errs := payload.CreateDeployCode(code, vmType, name, version, author, email, desc)
+	if errs != nil {
+		err := jitErr(errs)
+		return C.Cgou32{v: 0, err: 1, errmsg: err.errmsg}
+	}
+
+	wasmCode, errs := dep.GetWasmCode()
+	if errs != nil {
+		err := jitErr(errs)
+		return C.Cgou32{v: 0, err: 1, errmsg: err.errmsg}
+	}
+	_, errs = ReadWasmModule(wasmCode, true)
+	if errs != nil {
+		err := jitErr(errs)
+		return C.Cgou32{v: 0, err: 1, errmsg: err.errmsg}
+	}
+
+	contractAddr := dep.Address()
+
+	item, errs := Service.CacheDB.GetContract(contractAddr)
+	if errs != nil {
+		err := jitErr(errs)
+		return C.Cgou32{v: 0, err: 1, errmsg: err.errmsg}
+	}
+
+	if item != nil {
+		err := jitErr(errors.NewErr("contract has been deployed"))
+		return C.Cgou32{v: 0, err: 1, errmsg: err.errmsg}
+	}
+
+	Service.CacheDB.PutContract(dep)
+
+	cgou32 := jitWriteWasmMemory(vmctx, contractAddr[:], newAddressPtr)
+
+	return cgou32
+}
+
+//export ontio_contract_migrate_cgo
+func ontio_contract_migrate_cgo(vmctx *C.uchar,
+	codePtr uint32,
+	codeLen uint32,
+	vmType uint32,
+	namePtr uint32,
+	nameLen uint32,
+	verPtr uint32,
+	verLen uint32,
+	authorPtr uint32,
+	authorLen uint32,
+	emailPtr uint32,
+	emailLen uint32,
+	descPtr uint32,
+	descLen uint32,
+	newAddressPtr uint32) C.Cgou32 {
+	Service, err := jitService(vmctx)
+	if uint32(err.err) != 0 {
+		return C.Cgou32{v: 0, err: 1, errmsg: err.errmsg}
+	}
+
+	code, err := jitReadWasmMemory(vmctx, codePtr, codeLen)
+	if uint32(err.err) != 0 {
+		return C.Cgou32{v: 0, err: 1, errmsg: err.errmsg}
+	}
+
+	//cost := CONTRACT_CREATE_GAS + uint64(uint64(codeLen)/PER_UNIT_CODE_LEN)*UINT_DEPLOY_CODE_LEN_GAS
+
+	name, err := jitReadWasmMemory(vmctx, namePtr, nameLen)
+	if uint32(err.err) != 0 {
+		return C.Cgou32{v: 0, err: 1, errmsg: err.errmsg}
+	}
+
+	version, err := jitReadWasmMemory(vmctx, verPtr, verLen)
+	if uint32(err.err) != 0 {
+		return C.Cgou32{v: 0, err: 1, errmsg: err.errmsg}
+	}
+
+	author, err := jitReadWasmMemory(vmctx, authorPtr, authorLen)
+	if uint32(err.err) != 0 {
+		return C.Cgou32{v: 0, err: 1, errmsg: err.errmsg}
+	}
+
+	email, err := jitReadWasmMemory(vmctx, emailPtr, emailLen)
+	if uint32(err.err) != 0 {
+		return C.Cgou32{v: 0, err: 1, errmsg: err.errmsg}
+	}
+
+	desc, err := jitReadWasmMemory(vmctx, descPtr, descLen)
+	if uint32(err.err) != 0 {
+		return C.Cgou32{v: 0, err: 1, errmsg: err.errmsg}
+	}
+
+	dep, errs := payload.CreateDeployCode(code, vmType, name, version, author, email, desc)
+	if errs != nil {
+		err := jitErr(errs)
+		return C.Cgou32{v: 0, err: 1, errmsg: err.errmsg}
+	}
+
+	wasmCode, errs := dep.GetWasmCode()
+	if errs != nil {
+		err := jitErr(errs)
+		return C.Cgou32{v: 0, err: 1, errmsg: err.errmsg}
+	}
+	_, errs = ReadWasmModule(wasmCode, true)
+	if errs != nil {
+		err := jitErr(errs)
+		return C.Cgou32{v: 0, err: 1, errmsg: err.errmsg}
+	}
+
+	contractAddr := dep.Address()
+
+	item, errs := Service.CacheDB.GetContract(contractAddr)
+	if errs != nil {
+		err := jitErr(errs)
+		return C.Cgou32{v: 0, err: 1, errmsg: err.errmsg}
+	}
+
+	if item != nil {
+		err := jitErr(errors.NewErr("contract has been deployed"))
+		return C.Cgou32{v: 0, err: 1, errmsg: err.errmsg}
+	}
+
+	oldAddress := Service.ContextRef.CurrentContext().ContractAddress
+
+	Service.CacheDB.PutContract(dep)
+	Service.CacheDB.DeleteContract(oldAddress)
+
+	iter := Service.CacheDB.NewIterator(oldAddress[:])
+	for has := iter.First(); has; has = iter.Next() {
+		key := iter.Key()
+		val := iter.Value()
+
+		newkey := serializeStorageKey(contractAddr, key[20:])
+
+		Service.CacheDB.Put(newkey, val)
+		Service.CacheDB.Delete(key)
+	}
+
+	iter.Release()
+	if errs := iter.Error(); errs != nil {
+		err := jitErr(errs)
+		return C.Cgou32{v: 0, err: 1, errmsg: err.errmsg}
+	}
+
+	cgou32 := jitWriteWasmMemory(vmctx, contractAddr[:], newAddressPtr)
+
+	return cgou32
+}
+
+//export ontio_contract_destroy_cgo
+func ontio_contract_destroy_cgo() C.Cgoerror {
+	return C.Cgoerror{err: 0}
+}
+
+//export ontio_storage_read_cgo
+func ontio_storage_read_cgo(vmctx *C.uchar, keyPtr uint32, klen uint32, val uint32, vlen uint32, offset uint32) C.Cgou32 {
+	Service, err := jitService(vmctx)
+	if uint32(err.err) != 0 {
+		return C.Cgou32{v: 0, err: 1, errmsg: err.errmsg}
+	}
+
+	keybytes, err := jitReadWasmMemory(vmctx, keyPtr, klen)
+	if uint32(err.err) != 0 {
+		return C.Cgou32{v: 0, err: 1, errmsg: err.errmsg}
+	}
+
+	key := serializeStorageKey(Service.ContextRef.CurrentContext().ContractAddress, keybytes)
+
+	raw, errs := Service.CacheDB.Get(key)
+	if errs != nil {
+		err := jitErr(errs)
+		return C.Cgou32{v: 0, err: 1, errmsg: err.errmsg}
+	}
+
+	if raw == nil {
+		return C.Cgou32{v: C.uint(math.MaxUint32), err: 0}
+	}
+
+	item, errs := states2.GetValueFromRawStorageItem(raw)
+	if errs != nil {
+		err := jitErr(errs)
+		return C.Cgou32{v: 0, err: 1, errmsg: err.errmsg}
+	}
+
+	length := vlen
+	itemlen := uint32(len(item))
+	if itemlen < vlen {
+		length = itemlen
+	}
+
+	if uint32(len(item)) < offset {
+		err := jitErr(errors.NewErr("offset is invalid"))
+		return C.Cgou32{v: 0, err: 1, errmsg: err.errmsg}
+	}
+
+	cgou32 := jitWriteWasmMemory(vmctx, item[offset:offset+length], val)
+
+	return cgou32
+}
+
+//export ontio_storage_write_cgo
+func ontio_storage_write_cgo(vmctx *C.uchar, keyPtr uint32, keyLen uint32, valPtr uint32, valLen uint32) C.Cgoerror {
+	Service, err := jitService(vmctx)
+	if uint32(err.err) != 0 {
+		return err
+	}
+
+	keybytes, err := jitReadWasmMemory(vmctx, keyPtr, keyLen)
+	if uint32(err.err) != 0 {
+		return err
+	}
+
+	valbytes, err := jitReadWasmMemory(vmctx, valPtr, valLen)
+	if uint32(err.err) != 0 {
+		return err
+	}
+
+	//cost := uint64((len(keybytes)+len(valbytes)-1)/1024+1) * STORAGE_PUT_GAS
+	//self.checkGas(cost)
+
+	key := serializeStorageKey(Service.ContextRef.CurrentContext().ContractAddress, keybytes)
+
+	Service.CacheDB.Put(key, states2.GenRawStorageItem(valbytes))
+
+	return C.Cgoerror{err: 0}
+}
+
+//export ontio_storage_delete_cgo
+func ontio_storage_delete_cgo(vmctx *C.uchar, keyPtr uint32, keyLen uint32) C.Cgoerror {
+	Service, err := jitService(vmctx)
+	if uint32(err.err) != 0 {
+		return err
+	}
+
+	//self.checkGas(STORAGE_DELETE_GAS)
+
+	keybytes, err := jitReadWasmMemory(vmctx, keyPtr, keyLen)
+	if uint32(err.err) != 0 {
+		return err
+	}
+
+	key := serializeStorageKey(Service.ContextRef.CurrentContext().ContractAddress, keybytes)
+
+	Service.CacheDB.Delete(key)
+
+	return C.Cgoerror{err: 0}
+}
+
 //export ontio_notify_cgo
 func ontio_notify_cgo(vmctx *C.uchar, ptr uint32, l uint32) C.Cgoerror {
 	if l >= neotypes.MAX_NOTIFY_LENGTH {
@@ -126,7 +439,7 @@ func ontio_notify_cgo(vmctx *C.uchar, ptr uint32, l uint32) C.Cgoerror {
 		return err
 	}
 
-	bs, err := jitRreadWasmMemory(vmctx, ptr, l)
+	bs, err := jitReadWasmMemory(vmctx, ptr, l)
 	if uint32(err.err) != 0 {
 		return err
 	}
@@ -144,7 +457,7 @@ func ontio_notify_cgo(vmctx *C.uchar, ptr uint32, l uint32) C.Cgoerror {
 
 //export ontio_debug_cgo
 func ontio_debug_cgo(vmctx *C.uchar, data_ptr uint32, data_len uint32) C.Cgoerror {
-	bs, err := jitRreadWasmMemory(vmctx, data_ptr, data_len)
+	bs, err := jitReadWasmMemory(vmctx, data_ptr, data_len)
 	if uint32(err.err) != 0 {
 		return err
 	}
@@ -162,14 +475,14 @@ func ontio_call_contract_cgo(vmctx *C.uchar, contractAddr uint32, inputPtr uint3
 		return err
 	}
 
-	buff, err := jitRreadWasmMemory(vmctx, contractAddr, 20)
+	buff, err := jitReadWasmMemory(vmctx, contractAddr, 20)
 	if uint32(err.err) != 0 {
 		return err
 	}
 
 	copy(contractAddress[:], buff[:])
 
-	inputs, err := jitRreadWasmMemory(vmctx, inputPtr, inputLen)
+	inputs, err := jitReadWasmMemory(vmctx, inputPtr, inputLen)
 	if uint32(err.err) != 0 {
 		return err
 	}
@@ -291,18 +604,24 @@ func invokeJit(this *WasmVmService, contract *states.WasmContractParam, wasmCode
 	fmt.Printf("witnessAddrNum : %d\n", witnessAddrNum)
 	fmt.Printf("callersAddrNum : %d\n", callersAddrNum)
 
-	var witnessptr, callers_ptr *C.uchar
+	var witnessPtr, callersPtr, inputPtr *C.uchar
 
 	if witnessAddrNum == 0 {
-		witnessptr = (*C.uchar)((unsafe.Pointer)(nil))
+		witnessPtr = (*C.uchar)((unsafe.Pointer)(nil))
 	} else {
-		witnessptr = (*C.uchar)((unsafe.Pointer)(&witnessAddrBuff[0]))
+		witnessPtr = (*C.uchar)((unsafe.Pointer)(&witnessAddrBuff[0]))
 	}
 
 	if callersAddrNum == 0 {
-		callers_ptr = (*C.uchar)((unsafe.Pointer)(nil))
+		callersPtr = (*C.uchar)((unsafe.Pointer)(nil))
 	} else {
-		callers_ptr = (*C.uchar)((unsafe.Pointer)(&callersAddrBuff[0]))
+		callersPtr = (*C.uchar)((unsafe.Pointer)(&callersAddrBuff[0]))
+	}
+
+	if len(contract.Args) == 0 {
+		inputPtr = (*C.uchar)((unsafe.Pointer)(nil))
+	} else {
+		inputPtr = (*C.uchar)((unsafe.Pointer)(&contract.Args[0]))
 	}
 
 	inter_chain := C.InterOpCtx{
@@ -311,11 +630,11 @@ func invokeJit(this *WasmVmService, contract *states.WasmContractParam, wasmCode
 		timestamp:          C.ulonglong(this.Time),
 		tx_hash:            (*C.uchar)((unsafe.Pointer)(&(txHash[0]))),
 		self_address:       (*C.uchar)((unsafe.Pointer)(&contract.Address[0])),
-		callers:            callers_ptr,
+		callers:            callersPtr,
 		callers_num:        C.ulong(callersAddrNum),
-		witness:            witnessptr,
+		witness:            witnessPtr,
 		witness_num:        C.ulong(witnessAddrNum),
-		input:              (*C.uchar)((unsafe.Pointer)(&contract.Args[0])),
+		input:              inputPtr,
 		input_len:          C.ulong(len(contract.Args)),
 		wasmvm_service_ptr: C.ulonglong(this.wasmVmServicePtr),
 		gas_left:           C.ulonglong(0),
