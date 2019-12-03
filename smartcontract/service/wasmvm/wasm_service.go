@@ -17,13 +17,6 @@
  */
 package wasmvm
 
-/*
-#cgo CFLAGS: -I.
-#cgo LDFLAGS: -L. -lwasmjit -ldl
-#include "wasm_service.h"
-*/
-import "C"
-
 import (
 	"sync"
 	"unsafe"
@@ -41,23 +34,23 @@ import (
 )
 
 type WasmVmService struct {
-	Store            store.LedgerStore
-	CacheDB          *storage.CacheDB
-	ContextRef       context.ContextRef
-	Notifications    []*event.NotifyEventInfo
-	Code             []byte
-	Tx               *types.Transaction
-	Time             uint32
-	Height           uint32
-	BlockHash        common.Uint256
-	PreExec          bool
-	GasPrice         uint64
-	GasLimit         *uint64
-	ExecStep         *uint64
-	GasFactor        uint64
-	IsTerminate      bool
-	wasmVmServicePtr uint64
-	vm               *exec.VM
+	Store         store.LedgerStore
+	CacheDB       *storage.CacheDB
+	ContextRef    context.ContextRef
+	Notifications []*event.NotifyEventInfo
+	Code          []byte
+	Tx            *types.Transaction
+	Time          uint32
+	Height        uint32
+	BlockHash     common.Uint256
+	PreExec       bool
+	GasPrice      uint64
+	GasLimit      *uint64
+	ExecStep      *uint64
+	GasFactor     uint64
+	IsTerminate   bool
+	ServiceIndex  uint64
+	vm            *exec.VM
 }
 
 var (
@@ -101,21 +94,21 @@ func GetAddressBuff(addrs []common.Address) ([]byte, int) {
 		copy(addrsBuff[off*20:off*20+20], (*ptr)[:])
 	}
 
-	return addrsBuff, len(addrs)
+	return addrsBuff, addrsLen
 }
 
 func (this *WasmVmService) SetContextData() {
 	defer ctxDataMtx.Unlock()
 	ctxDataMtx.Lock()
 	ctxData[nextCtxDataIdx] = this
-	this.wasmVmServicePtr = nextCtxDataIdx
+	this.ServiceIndex = nextCtxDataIdx
 	nextCtxDataIdx++
 }
 
-func GetWasmVmService(wasmVmServicePtr uint64) *WasmVmService {
+func GetWasmVmService(index uint64) *WasmVmService {
 	defer ctxDataMtx.Unlock()
 	ctxDataMtx.Lock()
-	return ctxData[wasmVmServicePtr]
+	return ctxData[index]
 }
 
 func (this *WasmVmService) Invoke() (interface{}, error) {
