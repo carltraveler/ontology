@@ -27,7 +27,6 @@ package wasmvm
 import "C"
 
 import (
-	"fmt"
 	"io"
 	"math"
 	"unsafe"
@@ -35,10 +34,9 @@ import (
 	"github.com/ontio/ontology/common"
 	"github.com/ontio/ontology/common/log"
 	"github.com/ontio/ontology/core/payload"
+	states2 "github.com/ontio/ontology/core/states"
 	"github.com/ontio/ontology/core/types"
 	"github.com/ontio/ontology/errors"
-	//"github.com/ontio/ontology/smartcontract/context"
-	states2 "github.com/ontio/ontology/core/states"
 	"github.com/ontio/ontology/smartcontract/event"
 	native2 "github.com/ontio/ontology/smartcontract/service/native"
 	"github.com/ontio/ontology/smartcontract/service/native/utils"
@@ -101,7 +99,13 @@ func jitService(vmctx *C.wasmjit_vmctx_t) *WasmVmService {
 }
 
 func setCallOutPut(vmctx *C.wasmjit_vmctx_t, result []byte) {
-	C.wasmjit_set_call_output(vmctx, (*C.uchar)((unsafe.Pointer)(&result[0])), C.uint(len(result)))
+	var output *C.uchar
+	if len(result) != 0 {
+		output = (*C.uchar)((unsafe.Pointer)(&result[0]))
+	} else {
+		output = (*C.uchar)((unsafe.Pointer)(nil))
+	}
+	C.wasmjit_set_call_output(vmctx, output, C.uint(len(result)))
 }
 
 // c to call go interface
@@ -469,8 +473,6 @@ func invokeJit(this *WasmVmService, contract *states.WasmContractParam, wasmCode
 	txHash := this.Tx.Hash()
 	witnessAddrBuff, witness_len := GetAddressBuff(this.Tx.GetSignatureAddresses())
 	callersAddrBuff, callers_len := GetAddressBuff(this.ContextRef.GetCallerAddress())
-	fmt.Printf("witness_len : %d\n", witness_len)
-	fmt.Printf("callers_len : %d\n", callers_len)
 
 	var witnessPtr, callersPtr, inputPtr *C.uchar
 
@@ -497,7 +499,6 @@ func invokeJit(this *WasmVmService, contract *states.WasmContractParam, wasmCode
 	block_hash := (*C.h256_t)((unsafe.Pointer)(&this.BlockHash[0]))
 	timestamp := C.ulong(this.Time)
 	tx_hash := (*C.h256_t)((unsafe.Pointer)(&(txHash[0])))
-	self_address := (*C.address_t)((unsafe.Pointer)(&contract.Address[0]))
 	caller_raw := C.wasmjit_slice_t{data: callersPtr, len: C.uint(callers_len)}
 	witness_raw := C.wasmjit_slice_t{data: witnessPtr, len: C.uint(witness_len)}
 	input_raw := C.wasmjit_slice_t{data: inputPtr, len: C.uint(input_len)}
@@ -505,7 +506,7 @@ func invokeJit(this *WasmVmService, contract *states.WasmContractParam, wasmCode
 	gas_left := C.ulong(*this.GasLimit)
 	codeSlice := C.wasmjit_slice_t{data: (*C.uchar)((unsafe.Pointer)(&wasmCode[0])), len: C.uint(len(wasmCode))}
 
-	ctx := C.wasmjit_chain_context_create(height, block_hash, timestamp, tx_hash, self_address, caller_raw, witness_raw, input_raw, gas_left, service_index)
+	ctx := C.wasmjit_chain_context_create(height, block_hash, timestamp, tx_hash, caller_raw, witness_raw, input_raw, gas_left, service_index)
 	jit_buffer := C.wasmjit_invoke(codeSlice, ctx)
 
 	if jit_buffer.res.kind != C.uint(wasmjit_result_success) {
