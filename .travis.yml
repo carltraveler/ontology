@@ -7,7 +7,6 @@ go_import_path: github.com/ontio/ontology
 os:
   - linux
   - osx
-  - windows
 
 go:
   - 1.12.x
