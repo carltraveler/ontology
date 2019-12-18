@@ -7,15 +7,14 @@ go_import_path: github.com/ontio/ontology
 os:
   - linux
   - osx
-  - windows
 
 go:
   - 1.12.x
 
 script:
   - env GO111MODULE=on make all
-  - env GO111MODULE=on go mod vendor
-  - cd ./wasmtest && bash ./run-wasm-tests.sh && cd ../
-  - bash ./.travis.check-license.sh
-  - bash ./.travis.gofmt.sh
-  - bash ./.travis.gotest.sh
+  - if [ $TRAVIS_OS_NAME = 'linux' ]; then env GO111MODULE=on go mod vendor; fi
+  - if [ $TRAVIS_OS_NAME = 'linux' ]; then cd ./wasmtest && bash ./run-wasm-tests.sh && cd ../; fi
+  - if [ $TRAVIS_OS_NAME = 'linux' ]; then bash ./.travis.check-license.sh; fi
+  - if [ $TRAVIS_OS_NAME = 'linux' ]; then bash ./.travis.gofmt.sh; fi
+  - if [ $TRAVIS_OS_NAME = 'linux' ]; then bash ./.travis.gotest.sh; fi
