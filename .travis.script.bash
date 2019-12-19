@@ -2,7 +2,7 @@
 
 VERSION=$(git describe --always --tags --long)
 
-if [ $TRAVIS_OS_NAME != 'windows']; then
+if [ $TRAVIS_OS_NAME != 'windows' ]; then
 	env GO111MODULE=on make all
 	env GO111MODULE=on go mod vendor
 	cd ./wasmtest && bash ./run-wasm-tests.sh && cd ../
