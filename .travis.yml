@@ -12,5 +12,9 @@ os:
 go:
   - 1.12.x
 
-script:
-  - ./.travis.script.bash
+jobs:
+    include:
+        - language: rust
+          rust: stable
+          script:
+            - ./.travis.script.bash
