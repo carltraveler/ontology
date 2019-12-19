@@ -13,4 +13,4 @@ go:
   - 1.12.x
 
 script:
-  - bash ./.travis.script.bash
+  - ./.travis.script.bash
