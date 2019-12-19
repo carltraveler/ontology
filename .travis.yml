@@ -21,15 +21,12 @@ matrix:
         - language: rust
           rust: nightly
           os: linux
-          script:
-            - ./.travis.script.bash
         - language: rust
           rust: nightly
           os: windows
-          script:
-            - ./.travis.script.bash
         - language: rust
           rust: nightly
           os: osx
-          script:
-            - ./.travis.script.bash
+
+script:
+    - ./.travis.script.bash
