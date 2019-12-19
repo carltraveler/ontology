@@ -41,7 +41,6 @@ import:
 - package: golang.org/x/net
   repo: https://github.com/golang/net.git
 - package: github.com/go-interpreter/wagon
-  repo: https://github.com/ontio/wagon.git
-  version: ef8d35ecd300631b16c7f65e7a7fddd9c06eb336
+  repo: https://github.com/carltraveler/wagon.git
 ignore:
   - golang.org/x/sys/unix
