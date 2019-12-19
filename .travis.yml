@@ -12,9 +12,24 @@ os:
 go:
   - 1.12.x
 
-jobs:
+matrix:
+    exclude:
+        - os: linux
+        - os: osx
+        - os: windows
     include:
         - language: rust
-          rust: stable
+          rust: nightly
+          os: linux
+          script:
+            - ./.travis.script.bash
+        - language: rust
+          rust: nightly
+          os: windows
+          script:
+            - ./.travis.script.bash
+        - language: rust
+          rust: nightly
+          os: osx
           script:
             - ./.travis.script.bash
