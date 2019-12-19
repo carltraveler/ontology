@@ -12,7 +12,7 @@ os:
 go:
   - 1.12.x
 
-matrix:
+jobs:
     exclude:
         - os: linux
         - os: osx
