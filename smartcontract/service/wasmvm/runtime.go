@@ -708,7 +708,7 @@ func (self *Runtime) getContractType(addr common.Address) (ContractType, error) 
 }
 
 func (self *Runtime) checkGas(gaslimit uint64) {
-	gas := self.Service.vm.ExecMetrics
+	gas := self.Service.vm.AvaliableGas
 	if *gas.GasLimit >= gaslimit {
 		*gas.GasLimit -= gaslimit
 	} else {

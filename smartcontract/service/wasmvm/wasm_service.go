@@ -182,7 +182,7 @@ func invokeInterpreter(this *WasmVmService, contract *states.WasmContractParam, 
 
 	vm.HostData = host
 
-	vm.ExecMetrics = &exec.Gas{GasLimit: this.GasLimit, LocalGasCounter: 0, GasPrice: this.GasPrice, GasFactor: this.GasFactor, ExecStep: this.ExecStep}
+	vm.AvaliableGas = &exec.Gas{GasLimit: this.GasLimit, LocalGasCounter: 0, GasPrice: this.GasPrice, GasFactor: this.GasFactor, ExecStep: this.ExecStep}
 	vm.CallStackDepth = uint32(WASM_CALLSTACK_LIMIT)
 	vm.RecoverPanic = true
 
