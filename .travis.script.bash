@@ -12,6 +12,6 @@ if [ $TRAVIS_OS_NAME != 'windows' ]; then
 	bash ./.travis.gotest.sh
 else
 	echo "windows mod"
-	CGO_ENABLED=1 go build  -ldflags "-X github.com/ontio/ontology/common/config.Version=${VERSION}" -o ontology-windows-amd64 main.go
-	go build  -ldflags "-X github.com/ontio/ontology/common/config.Version=${VERSION}" -o sigsvr-windows-amd64 sigsvr.go
+	env GO111MODULE=on CGO_ENABLED=1 go build  -ldflags "-X github.com/ontio/ontology/common/config.Version=${VERSION}" -o ontology-windows-amd64 main.go
+	env GO111MODULE=on go build  -ldflags "-X github.com/ontio/ontology/common/config.Version=${VERSION}" -o sigsvr-windows-amd64 sigsvr.go
 fi
