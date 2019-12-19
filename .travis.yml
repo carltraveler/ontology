@@ -13,9 +13,4 @@ go:
   - 1.12.x
 
 script:
-  - env GO111MODULE=on make all
-  - if [ $TRAVIS_OS_NAME = 'linux' ]; then env GO111MODULE=on go mod vendor; fi
-  - if [ $TRAVIS_OS_NAME = 'linux' ]; then cd ./wasmtest && bash ./run-wasm-tests.sh && cd ../; fi
-  - if [ $TRAVIS_OS_NAME = 'linux' ]; then bash ./.travis.check-license.sh; fi
-  - if [ $TRAVIS_OS_NAME = 'linux' ]; then bash ./.travis.gofmt.sh; fi
-  - if [ $TRAVIS_OS_NAME = 'linux' ]; then bash ./.travis.gotest.sh; fi
+  - bash ./.travis.script.bash
