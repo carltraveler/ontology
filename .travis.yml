@@ -12,21 +12,21 @@ os:
 go:
   - 1.12.x
 
-    #jobs:
-    #    exclude:
-    #        - os: linux
-    #        - os: osx
-    #        - os: windows
-    #    include:
-    #        - language: rust
-    #          rust: nightly
-    #          os: linux
-    #        - language: rust
-    #          rust: nightly
-    #          os: windows
-    #        - language: rust
-    #          rust: nightly
-    #          os: osx
+jobs:
+    exclude:
+        - os: linux
+        - os: osx
+        - os: windows
+    include:
+        - language: rust
+          rust: nightly
+          os: linux
+        - language: rust
+          rust: nightly
+          os: windows
+        - language: rust
+          rust: nightly
+          os: osx
 
 script:
     - ./.travis.script.bash
