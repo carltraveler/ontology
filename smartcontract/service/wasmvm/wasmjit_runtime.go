@@ -22,7 +22,7 @@ package wasmvm
 #cgo CFLAGS: -I.
 #cgo darwin LDFLAGS: -L. -lwasmjit_onto_interface_darwin -ldl -lc -lm
 #cgo linux LDFLAGS: -L. -lwasmjit_onto_interface -ldl -lc -lm
-#cgo windows LDFLAGS: -Wl,-rpath,${SRCDIR} -L. -lwasmjit_onto_interface_win -llibdl -llibc -llibm
+#cgo windows LDFLAGS: -Wl,-rpath,${SRCDIR} -L. -lwasmjit_onto_interface -llibdl -llibc -llibm
 #include "wasmjit_runtime.h"
 #include <stdlib.h>
 */
