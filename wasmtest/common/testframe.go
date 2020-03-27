@@ -325,6 +325,9 @@ func ExecTxCheckRes(tx *types.Transaction, testCase TestCase, database *ledger.L
 	res, err := database.PreExecuteContract(tx)
 	checkErr(err)
 	log.Infof("testcase consume gas: %d", res.Gas)
+	if res.Gas > 20000 {
+		panic("xxxx")
+	}
 
 	height := database.GetCurrentBlockHeight()
 	header, err := database.GetHeaderByHeight(height)
@@ -449,7 +452,7 @@ func InvokeSpecifiedContract(acct *account.Account, database *ledger.Ledger, con
 
 	item := FindContractByName(contractfile, testContext)
 	if item == nil {
-		return fmt.Errorf("contract %s not exist\n")
+		return fmt.Errorf("contract %s not exist\n", contractfile)
 	}
 
 	if strings.HasSuffix(contractfile, ".avm") {
@@ -735,4 +738,5 @@ func execTxGasTest(tx *types.Transaction, database *ledger.Ledger) {
 	})
 	checkErr(err)
 	assertEq(res_jit, res_inter)
+	log.Infof("accault testcase consume gas: %d", res_inter.Gas)
 }

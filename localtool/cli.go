@@ -20,7 +20,7 @@ package main
 
 import (
 	"encoding/json"
-	//"fmt"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
@@ -82,9 +82,15 @@ func ontologyCLI(ctx *cli.Context) error {
 			}
 			// currently only use the index zero array.
 			for _, testcase := range configelt.Testcase[0] {
-				err := common.TestWithConfigElt(acct, database, configelt.Contract, testcase, testContext)
-				if err != nil {
-					return err
+				if testcase.RunTimes == 0 {
+					testcase.RunTimes = 1
+				}
+
+				for i := uint32(0); i < testcase.RunTimes; i++ {
+					err := common.TestWithConfigElt(acct, database, configelt.Contract, testcase, testContext)
+					if err != nil {
+						return err
+					}
 				}
 			}
 		}

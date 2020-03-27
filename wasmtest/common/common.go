@@ -75,6 +75,7 @@ func (self *TestEnv) UnmarshalJSON(buf []byte) error {
 type TestCase struct {
 	Env         TestEnv `json:"env"`
 	NeedContext bool    `json:"needcontext"`
+	RunTimes    uint32  `json:"runtimes"`
 	Method      string  `json:"method"`
 	Param       string  `json:"param"`
 	Expect      string  `json:"expected"`
