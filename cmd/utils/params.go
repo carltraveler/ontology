@@ -37,6 +37,7 @@ const (
 	PARAM_TYPE_INTEGER    = "int"
 	PARAM_TYPE_BOOLEAN    = "bool"
 	PARAM_TYPE_ADDRESS    = "address"
+	PARAM_TYPE_H256       = "h256"
 	PARAM_LEFT_BRACKET    = "["
 	PARAM_RIGHT_BRACKET   = "]"
 	PARAM_ESC_CHAR        = `/`
@@ -199,7 +200,8 @@ func parseRawParamValue(pType string, pValue string) (interface{}, error) {
 		}
 	case PARAM_TYPE_ADDRESS:
 		return common.AddressFromBase58(pValue)
-
+	case PARAM_TYPE_H256:
+		return common.Uint256FromHexString(pValue)
 	default:
 		return nil, fmt.Errorf("unspport param type:%s", pType)
 	}

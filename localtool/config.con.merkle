@@ -1,0 +1,14 @@
+{
+	"testconfig":[
+		{
+			"contract" : "a.wasm",
+			"testcase": [
+				[{"env":{"witness":["APHNPLz2u1JUXyD8rhryLaoQrW46J3P6y2"]}, "method":"set_owner", "param":"address:Ab1z3Sxy7ovn4AuScdmMh4PRMvcwCMzSNV"},
+				{"env":{"witness":["Ab1z3Sxy7ovn4AuScdmMh4PRMvcwCMzSNV"]}, "method":"get_root"},
+				{"env":{"witness":["Ab1z3Sxy7ovn4AuScdmMh4PRMvcwCMzSNV"]}, "runtimes": 10000, "method":"batch_add", "param":"[h256:8855508aade16ec573d21e6a485dfd0a7624085c1a14b5ecdd6485de0c6839a4]"},
+				{"env":{"witness":["Ad4pjz2bqep4RhQrUAzMuZJkBC3qJ1tZuT","Ab1z3Sxy7ovn4AuScdmMh4PRMvcwCMzSNV"]}, "method":"get_root"}
+    	    	]
+			]
+		}
+	]
+}
