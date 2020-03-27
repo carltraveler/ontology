@@ -72,13 +72,8 @@ func checkErr(err error) {
 	}
 }
 
-func InitOntologyLedger() (*account.Account, *ledger.Ledger) {
-	datadir := "testdata"
+func InitOntologyLedger(datadir string) (*account.Account, *ledger.Ledger) {
 	err := os.RemoveAll(datadir)
-	defer func() {
-		_ = os.RemoveAll(datadir)
-		_ = os.RemoveAll(log.PATH)
-	}()
 	checkErr(err)
 	log.Trace("Node version: ", config.Version)
 
@@ -320,7 +315,7 @@ func MakeTestContext(acct *account.Account, contract []Item) *TestContext {
 
 func ExecTxCheckRes(tx *types.Transaction, testCase TestCase, database *ledger.Ledger, addr common.Address, acct *account.Account) error {
 	// here new patched
-	execTxGasTest(tx, database)
+	//execTxGasTest(tx, database)
 
 	res, err := database.PreExecuteContract(tx)
 	checkErr(err)
@@ -706,7 +701,7 @@ func LoadContracts(deployobject string) ([]Item, bool, error) {
 }
 
 func execTxGasTest(tx *types.Transaction, database *ledger.Ledger) {
-	//
+
 	res_jit, err := database.GetStore().(*ledgerstore.LedgerStoreImp).PreExecuteContractWithParam(tx, ledgerstore.PrexecuteParam{
 		JitMode:    true,
 		WasmFactor: 1,
@@ -738,5 +733,4 @@ func execTxGasTest(tx *types.Transaction, database *ledger.Ledger) {
 	})
 	checkErr(err)
 	assertEq(res_jit, res_inter)
-	log.Infof("accault testcase consume gas: %d", res_inter.Gas)
 }

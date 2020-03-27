@@ -28,7 +28,7 @@ const (
 )
 
 func main() {
-	acct, database := common.InitOntologyLedger()
+	acct, database := common.InitOntologyLedger("testdata")
 
 	log.Info("loading contract")
 	contract, _, err := common.LoadContracts(testdir)

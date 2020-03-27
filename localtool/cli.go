@@ -43,6 +43,7 @@ type TestConfig struct {
 }
 
 func ontologyCLI(ctx *cli.Context) error {
+	datadir := "testdata"
 	// Get the deployObject.
 	args := ctx.Args()
 	if len(args) != 1 {
@@ -65,7 +66,7 @@ func ontologyCLI(ctx *cli.Context) error {
 		return err
 	}
 
-	acct, database := common.InitOntologyLedger()
+	acct, database := common.InitOntologyLedger(datadir)
 	err = common.DeployContract(acct, database, contracts)
 	if err != nil {
 		return err
@@ -99,6 +100,8 @@ func ontologyCLI(ctx *cli.Context) error {
 			return err
 		}
 	}
+	_ = os.RemoveAll(datadir)
+	_ = os.RemoveAll(log.PATH)
 
 	return nil
 }
