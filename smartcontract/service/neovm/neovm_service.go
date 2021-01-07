@@ -32,6 +32,7 @@ import (
 	"github.com/ontio/ontology/smartcontract/context"
 	"github.com/ontio/ontology/smartcontract/event"
 	"github.com/ontio/ontology/smartcontract/storage"
+	"github.com/ontio/ontology/smartcontract/test/makemap"
 	vm "github.com/ontio/ontology/vm/neovm"
 	vmty "github.com/ontio/ontology/vm/neovm/types"
 )
@@ -176,6 +177,15 @@ func (this *NeoVmService) Invoke() (interface{}, error) {
 
 		if !this.ContextRef.CheckUseGas(price) {
 			return nil, ERR_GAS_INSUFFICIENT
+		}
+
+		if makemap.DEBUGMODE_MAP {
+			fmt.Printf("offset: %d\t OpCode:%d\t OpName:", this.Engine.Context.GetInstructionPointer()-1, opCode)
+			if opCode >= vm.PUSHBYTES1 && opCode <= vm.PUSHBYTES75 {
+				fmt.Printf("%s%d\n", "PUSHBYTES", opCode)
+			} else {
+				fmt.Printf("%s\n", makemap.Codemap[opCode])
+			}
 		}
 
 		switch opCode {

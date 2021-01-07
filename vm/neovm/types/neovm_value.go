@@ -771,7 +771,19 @@ func (self *VmValue) dump() string {
 	case bigintType:
 		return fmt.Sprintf("bigint(0x%x)", self.bigInt)
 	case bytearrayType:
-		return fmt.Sprintf("string(\"%s\")", self.byteArray)
+		isByte := false
+		for _, s := range self.byteArray {
+			// if any one char is not showable char. consider it as a byteArray
+			if s < 0x20 || s > 0x7E {
+				isByte = true
+				break
+			}
+		}
+		if isByte {
+			return fmt.Sprintf("byteArray(\"0x%x\")", self.byteArray)
+		} else {
+			return fmt.Sprintf("string(\"%s\")", self.byteArray)
+		}
 	case arrayType:
 		data := ""
 		for _, v := range self.array.Data {
